@@ -143,9 +143,9 @@ def _are_adjacent_basepairs(seq_ids, edge1, edge2):
     if (abs(seq_ids.index(fromA) - seq_ids.index(fromB)) == 1 and
             abs(seq_ids.index(toA) - seq_ids.index(toB)) == 1):
         log.debug(
-            "Basepairs %s and %s are adjacent. No length 1 stem", edge1, edge2)
+            "Basepairs {} and {} are adjacent. No length 1 stem".format(edge1, edge2))
         return True
-    log.debug("Basepairs %s and %s are NOT adjacent.", edge1, edge2)
+    log.debug("Basepairs {} and {} are NOT adjacent.".format(edge1, edge2))
     return False
 
 
@@ -165,7 +165,7 @@ def _annotate_pdb(filename, annotation_tool, filetype, subprocess_kwargs={}):
         c = config.read_config()
         if "PDB_ANNOTATION_TOOL" in c:
             program = c["PDB_ANNOTATION_TOOL"]
-    log.info("Requested annotation program is %s", program)
+    log.info("Requested annotation program is {}".format(program))
     if program == "DSSR" or program is None:
         if which("x3dna-dssr"):
             return _run_dssr(filename, subprocess_kwargs)
@@ -208,7 +208,7 @@ def _run_dssr(filename, subprocess_kwargs={}):
                      "--prefix=" + os.path.join(dssr_output_dir, "d"),
                      "-o=" + dssr_out, "--json"]
         # https://stackoverflow.com/a/14837250/5069869
-        log.info("Running DSSR: %s", sp.list2cmdline(arguments))
+        log.info("Running DSSR: {}".format(sp.list2cmdline(arguments)))
         with open(os.path.join(dssr_output_dir, "stderror"), "w+") as errfile:
             try:
                 ret_code = sp.call(
@@ -229,8 +229,8 @@ def _run_dssr(filename, subprocess_kwargs={}):
                                        nt["nt_id"] for nt in nts]))
                 except (OSError, IOError) as e:
                     with log_to_exception(log, e):
-                        log.error("Content of the directory %s is %s",
-                                  dssr_output_dir, os.listdir(dssr_output_dir))
+                        log.error("Content of the directory {} is {}".format(
+                            dssr_output_dir, os.listdir(dssr_output_dir)))
                     raise
             except (OSError, IOError) as e:
                 assert op.isfile(
@@ -242,7 +242,7 @@ def _run_dssr(filename, subprocess_kwargs={}):
                         e = CgConstructionError(
                             "DSSR could not process the file: " + err_msg[-3])
                     with log_to_exception(log, e):
-                        log.error("Captured Stderr is:\n%s", "".join(
+                        log.error("Captured Stderr is:\n" + "".join(
                             ["... " + line for line in err_msg]))
                     raise e
                 else:
@@ -439,10 +439,10 @@ class CoarseGrainRNA(fgb.BulgeGraph):
             new_chains = []
             for chain in chains:
                 if load_chains in [None, "biggest"] or chain.id in load_chains:
-                    log.debug("Loaded Chain %s", chain.id)
+                    log.debug("Loaded Chain {}".format(chain.id))
                     chain, modifications = ftup.clean_chain(chain, query_PDBeChem)
                     new_chains.append(chain)
-            log.debug("%s, %s", pdb_filename, os.path.split(pdb_filename))
+            log.debug("{}, {}".format(pdb_filename, os.path.split(pdb_filename)))
             fn_basename = os.path.split(pdb_filename)[1]
             if load_chains is None:
                 chain_string = "None"
@@ -507,7 +507,7 @@ class CoarseGrainRNA(fgb.BulgeGraph):
                             break
                     else:  # break NOT encountered.
                         log.debug(
-                            "No connection remaining between chains %s and %s", chain1, chain2)
+                            "No connection remaining between chains {} and {}".format(chain1, chain2))
                         chain_connections.remove_edge(chain1, chain2)
 
         log.debug("CONNECTIONS: {}, nodes {}".format(
@@ -532,7 +532,7 @@ class CoarseGrainRNA(fgb.BulgeGraph):
             except GraphConstructionError as e:
                 log_exception(e, logging.ERROR, with_stacktrace=False)
                 log.error(
-                    "Could not load chains %s, due to the above mentioned error.", list(component))
+                    "Could not load chains {}, due to the above mentioned error.".format(list(component)))
                 raise
 
         cgs.sort(key=lambda x: x.name)
@@ -540,7 +540,7 @@ class CoarseGrainRNA(fgb.BulgeGraph):
             for cg in cgs:
                 cg.dssr = ftud.DSSRAnnotation(dssr_dict, cg)
                 cg.infos["dssr_stacks"] = cg.dssr.stacking_loops()
-        log.debug("Returning %s", cgs)
+        log.debug("Returning {}".format(cgs))
         return cgs
 
     @classmethod
@@ -552,9 +552,8 @@ class CoarseGrainRNA(fgb.BulgeGraph):
         :param original_bpseq_lines: List of strings. Will be filtered for chains.
         """
         #print(component, type(component))
-        log.info("Loading PDB: Connected component with chains %s",
-                 str(list(chain_ids)))
-        log.debug("missing residues %s", missing_res)
+        log.info("Loading PDB: Connected component with chains {}".format(str(list(chain_ids))))
+        log.debug("missing residues {}".format(missing_res))
         # Since the external annotation program can take some time,
         # we do not re-annotate, but filter the bpseq_string instead.
         new_bpseq = []
@@ -586,7 +585,7 @@ class CoarseGrainRNA(fgb.BulgeGraph):
             seq_lengths = list(map(len, seq_fragments))
             if list(map(len, stru_fragments)) != seq_lengths:
                 raise ValueError("The given secondary structure is inconsistent "
-                                 "with the pdb-chain-lengths of %s", seq_lengths)
+                                 "with the pdb-chain-lengths of {}".format(seq_lengths))
         sequence = Sequence(seq_str, new_seqids,
                             [r for r in missing_res if r["chain"] in chain_ids],
                             {k: v for k, v in modifications.items() if k.chain in chain_ids})
@@ -680,7 +679,7 @@ class CoarseGrainRNA(fgb.BulgeGraph):
         for stem in self.stem_iterator():
             try:
                 log.debug(
-                    "Adding virtual residues for stem %s with coords %s", stem, self.coords[stem])
+                    "Adding virtual residues for stem {} with coords {}".format(stem, self.coords[stem]))
                 ftug.add_virtual_residues(self, stem)
             except (KeyError, ValueError, AssertionError):
                 if np.all(np.isnan(self.coords[stem])):
@@ -705,7 +704,7 @@ class CoarseGrainRNA(fgb.BulgeGraph):
           origin, basis = ftug.element_coord_system(self, elem)
           new_coords = ftuv.change_basis(
               elem_coords, ftuv.standard_basis, basis) + origin
-          log.debug("%s %s: coords %s mapped to %s", elem, i, elem_coords, new_coords)
+          log.debug("{} {}: coords {} mapped to {}".format(elem, i, elem_coords, new_coords))
           yield new_coords
 
     def get_virtual_residue(self, pos, allow_single_stranded=False):
@@ -745,7 +744,7 @@ class CoarseGrainRNA(fgb.BulgeGraph):
                 origin, basis = ftug.element_coord_system(self, elem)
                 new_coords = ftuv.change_basis(
                     elem_coords, ftuv.standard_basis, basis) + origin
-                log.debug("%s %s: coords %s mapped to %s", elem, i, elem_coords, new_coords)
+                log.debug("{} {}: coords {} mapped to {}".format(elem, i, elem_coords, new_coords))
                 return new_coords
             except KeyError as e:
                 try:
@@ -754,8 +753,8 @@ class CoarseGrainRNA(fgb.BulgeGraph):
                     self._has_warned_old_vres = set()
                 if elem not in self._has_warned_old_vres:
                     log.warning(
-                        "No virtual residues have been loaded for loops: %s (for pos %s) in elem %s."
-                        "Using inaccurate position along the cylinder instead.", e, pos, elem)
+                        f"No virtual residues have been loaded for loops: {e} (for pos {pos}) in elem {elem}."
+                        "Using inaccurate position along the cylinder instead.")
                     self._has_warned_old_vres.add(elem)
                 if not allow_single_stranded:
                     raise ValueError(
@@ -783,7 +782,8 @@ class CoarseGrainRNA(fgb.BulgeGraph):
                 else:
                     l = pos - self.defines[elem][0]
                     perc = (l+1) / (self.element_length(elem)+1)
-                log.debug("Calculating vres: %s,%s, %s: length=%s, perc=%s",elem, pos, l,(self.coords[elem][1] - self.coords[elem][0]), perc)
+                log.debug("Calculating vres: {},{}, {}: length={}, perc={}".format(
+                    elem, pos, l,(self.coords[elem][1] - self.coords[elem][0]), perc))
                 return self.coords[elem][0] + (self.coords[elem][1] - self.coords[elem][0]) * perc
 
     def get_ordered_stem_poss(self):
@@ -998,21 +998,19 @@ class CoarseGrainRNA(fgb.BulgeGraph):
         if not forward:
             connections = connections[::-1]
 
-        log.debug("elem %s connections %s", elem, connections)
+        log.debug("elem {} connections {}".format(elem, connections))
         (stem1, twist1, stem2, twist2, bulge) = ftug.get_stem_twist_and_bulge_vecs(
             self, elem, connections)
-        log.debug("stem1 %s, twist1 %s, stem2 %s, twist2 %s, bulge %s",
-                  stem1, twist1, stem2, twist2, bulge)
+        log.debug("stem1 {}, twist1 {}, stem2 {}, twist2 {}, bulge {}".format(stem1, twist1, stem2, twist2, bulge))
 
         if round(np.dot(stem1, twist1), 10) != 0 or round(np.dot(stem2, twist2), 10) != 0:
             err = CgIntegrityError("The twists are inconsistent. "
                                    "They should be orthogonal to the corresponding stem vectors."
                                    "Inconsistency found for {},{}".format(elem, connections))
             with log_to_exception(log, err):
-                log.error("Angle stem1-twist1 %s dot_product=%s, Angle stem2-twist2 %s degrees dot_product=%s",
-                          math.degrees(ftuv.vec_angle(stem1, twist1)
-                                       ), np.dot(stem1, twist1),
-                          math.degrees(ftuv.vec_angle(stem2, twist2)), np.dot(stem2, twist2),)
+                log.error("Angle stem1-twist1 {} dot_product={}, Angle stem2-twist2 {} degrees dot_product={}".format(
+                          math.degrees(ftuv.vec_angle(stem1, twist1)), np.dot(stem1, twist1),
+                          math.degrees(ftuv.vec_angle(stem2, twist2)), np.dot(stem2, twist2),))
             raise err
 
         try:
@@ -1020,12 +1018,12 @@ class CoarseGrainRNA(fgb.BulgeGraph):
                 stem1, twist1, stem2, twist2, bulge)
         except ZeroDivisionError as e:
             with log_to_exception(log, e):
-                log.error("Error getting stats for elem %s", elem)
+                log.error("Error getting stats for elem {}".format(elem))
             raise
         dims = self.get_bulge_dimensions(elem)
         ang_type = self.connection_type(elem, connections)
         seq = "&".join(self.get_define_seq_str(elem, adjacent=True))
-        log.debug("u %s, v %s", u, v)
+        log.debug("u {}, v {}".format(u, v))
 
         if elem[0] == "m":
             mls = self.find_mlonly_multiloops()
@@ -1364,7 +1362,7 @@ class CoarseGrainRNA(fgb.BulgeGraph):
         '''
         if len(list(self.stem_iterator())) == 0:
             log.warning(
-                "Cannnot calculate ROG (%s) for structure %s without stems. Returning 'nan'", method, self.name)
+                "Cannnot calculate ROG ({}) for structure {} without stems. Returning 'nan'".format(method, self.name))
             return float("nan")
         if method == "fast":
             coords = self.get_ordered_stem_poss()
@@ -1401,7 +1399,7 @@ class CoarseGrainRNA(fgb.BulgeGraph):
             e = ValueError(
                 "The multiloop segments do not form a 3-way junction.")
             with log_to_exception(log, e):
-                log.error("stems are %s", stems)
+                log.error("stems are {}".format(stems))
             raise e
         collinearities = {}
         for stem1, stem2 in it.combinations(stems, 2):

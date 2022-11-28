@@ -30,13 +30,13 @@ def main(parser):
     for i, cg in enumerate(cgs):
 
         if len(list(cg.stem_iterator())) == 0:
-            log.warning("Skipping RNA %s (%s): no stems", i, cg.pdb_name)
+            log.warning("Skipping RNA {} ({}): no stems".format(i, cg.pdb_name))
             continue
 
         for d in cg.defines.keys():
             if np.allclose(cg.coords[d][0], cg.coords[d][1]):
                 log.warning(
-                    "Skipping element %s of RNA %s (%s): degenerate coordinates.", d, i, cg.pdb_name)
+                    "Skipping element {} of RNA {} ({}): degenerate coordinates.".format(d, i, cg.pdb_name))
                 continue
 
             origin, basis = ftug.element_coord_system(cg, d)

@@ -86,7 +86,7 @@ def tune_model(geometry_file, trainset, testset):
     for loop_type in "hi":
         pI = calculate_pI(df, loop_type)
         # sum(labels)/(sum(labels)+len(df[mask_non_fred]))
-        log.info("PI %s", pI)
+        log.info("PI {}".format(pI))
         all_params[loop_type] = find_hyperparameters(loop_type, df,
                                                      pI, trainset, testset)
     return all_params
@@ -122,8 +122,7 @@ def find_hyperparameters(loop_type, df, pI, trainset, testset):
         raise ValueError("Either trainings- or testset are empty.")
     X_train, y_train = ftca.df_to_data_labels(df_train, loop_type)
     X_test, y_test = ftca.df_to_data_labels(df_test, loop_type)
-    log.info("Length trainingsset: %s, length testset: %s",
-             len(X_train), len(X_test))
+    log.info("Length trainingsset: {}, length testset: {}".format(len(X_train), len(X_test)))
 
     # We use the gaussian kernel to avoid certain artefacts of the linear
     # one and symmetric due to geometric considerations.
@@ -132,10 +131,10 @@ def find_hyperparameters(loop_type, df, pI, trainset, testset):
     scores = []
     bandwidths = np.linspace(0.01, 1.0, 25)
     for bandwidth in bandwidths:
-        log.debug("bandwidth %s", bandwidth)
+        log.debug("bandwidth {}".format(bandwidth))
         clf.set_params(bandwidth=bandwidth)
         score = clf.score(X_test, y_test)
-        log.debug("score is %s", score)
+        log.debug("score is {}".format(score))
         scores.append(score)
     best_i = scores.index(max(scores))
     best_bandwidth = bandwidths[best_i]
@@ -144,9 +143,9 @@ def find_hyperparameters(loop_type, df, pI, trainset, testset):
     tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
     specificity = tn / (tn + fp)
     sensitivity = tp / (tp + fn)
-    log.info("Classification report for loop type %s (using CV, bw=%s)\n:"
-             "tp: %s, fp: %s, tn: %s, fn: %s, sens: %s, spec; %s",
-             loop_type, best_bandwidth, tp, fp, tn, fn, sensitivity, specificity)
+    log.info("Classification report for loop type {} (using CV, bw={})\n: "
+             "tp: {}, fp: {}, tn: {}, fn: {}, sens: {}, spec; {}".format(
+             loop_type, best_bandwidth, tp, fp, tn, fn, sensitivity, specificity))
     if sensitivity < 0.8 or specificity < 0.8:
         warnings.warn("The crossvalidation score for loop tpype {} is "
                       "worse than expected: sensitivity: {},"
@@ -199,12 +198,10 @@ class AmeGeometrySet(Set):
         if key in self.geometries:
             # Smaller score is better
             if geometry.score > self.geometries[key].score:
-                log.info("Duplicate geometry: %s has worse score "
-                         "than %s", geometry, self.geometries[key])
+                log.info("Duplicate geometry: {} has worse score than {}".format(geometry, self.geometries[key]))
                 return
             else:
-                log.info("Duplicate geometry: "
-                         "%s replacing %s", geometry, self.geometries[key])
+                log.info("Duplicate geometry: {} replacing {}".format(geometry, self.geometries[key]))
         self.geometries[key] = geometry
 
     def __contains__(self, geo):
@@ -258,7 +255,7 @@ def _parse_fred_line(line, all_cgs, current_annotation, mapping_directory):
             pdb_name = chains[0][0].split(".")[0]
             chains = [c[1] for c in chains]
             log.debug(
-                "For bundle: pdb_name = %s, converted-chains = %s", pdb_name, chains)
+                "For bundle: pdb_name = {}, converted-chains = {}".format(pdb_name, chains))
         else:
             pdb_name = parts[0]
         cgs = all_cgs[parts[0]]
@@ -267,8 +264,7 @@ def _parse_fred_line(line, all_cgs, current_annotation, mapping_directory):
         else:
             # First, filter by pdb-bundle file.
             cgs = [cg for cg in cgs if pdb_name in cg.name]
-            log.debug("cgs for pbd-name %s are %s",
-                      pdb_name, [c.name for c in cgs])
+            log.debug("cgs for pbd-name {} are {}".format(pdb_name, [c.name for c in cgs]))
             # Then for multiple chains, search based on resid.
             a_res = _safe_resid_from_chain_res(
                 chain=chains[0], residue=parts[3])
@@ -287,7 +283,7 @@ def _parse_fred_line(line, all_cgs, current_annotation, mapping_directory):
         warnings.warn(
             "No CoarseGrainRNA found for FR3D annotation with PDB-ID {}. Possible PDB-IDs are {}".format(parts[0], all_cgs.keys()))
         return
-    log.debug("FR3D line refers to cg %s", cg.name)
+    log.debug("FR3D line refers to cg {}".format(cg.name))
     # We now have the CoarseGrainRNA. Get the interacting cg-elements.
     nums = []
     for i in range(3):
@@ -305,8 +301,8 @@ def _parse_fred_line(line, all_cgs, current_annotation, mapping_directory):
                                                list(map(lambda x: x.name, all_cgs[parts[0]]))))
                 return
             else:
-                log.error("%s %s", cg.seq, type(cg.seq))
-                log.error("All seq_ids=%s", cg.seq._seqids)
+                log.error("{} {}".format(cg.seq, type(cg.seq)))
+                log.error("All seq_ids={}".format(cg.seq._seqids))
                 raise
     nodes = list(map(lambda x: cg.get_node_from_residue_num(x), nums))
     if nodes[1] != nodes[2] or nodes[1][0] != "s":
@@ -377,7 +373,7 @@ def parse_fred(cutoff_dist, all_cgs, fr3d_out, chain_id_mapping_dir):
                 current_annotation = line[9:]
             elif line.startswith("#"):
                 current_annotation = "?"
-            log.debug("Line '%s'.read", line)
+            log.debug("Line '{}'.read".format(line))
             geometry = _parse_fred_line(
                 line, all_cgs, current_annotation, chain_id_mapping_dir)
             if geometry is None:
@@ -434,8 +430,7 @@ def from_fr3d_to_orientation(cgs, fr3d_outfile, chain_id_mapping_dir):
     with open(fr3d_outfile) as f:
         aminor_geometries, num_skipped = parse_fred(
             ftca.CUTOFFDIST, all_cgs, f, chain_id_mapping_dir)
-    log.info("%d entries skipped during FR3D parsing, %s entries retained",
-             num_skipped, len(aminor_geometries))
+    log.info("{} entries skipped during FR3D parsing, {} entries retained".format(num_skipped, len(aminor_geometries)))
     if len(aminor_geometries) == 0:
         raise ValueError(
             "No A-Minor geometries found. Is the FR3D output file correct?")
@@ -477,13 +472,13 @@ def _enumerate_background_geometries(all_cgs, cutoff_dist, aminor_geometries):
                                                   flexibility)
                             if geometry in aminor_geometries:
                                 log.info(
-                                    "Geometry %s is in aminor_geometries", geometry)
+                                    "Geometry {} is in aminor_geometries".format(geometry))
                             else:
                                 non_ame_geometries.add(geometry)
             except BaseException as e:
                 with log_to_exception(log, e):
                     log.error(
-                        "An Error occurred during processing of cg: %s", cg.name)
+                        "An Error occurred during processing of cg: {}".format(cg.name))
                 raise
-    log.error("%s non_ame geometries found", len(non_ame_geometries))
+    log.error("{} non_ame geometries found".format(len(non_ame_geometries)))
     return non_ame_geometries

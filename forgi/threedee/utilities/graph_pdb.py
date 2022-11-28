@@ -238,11 +238,11 @@ def get_stem_orientation_parameters(stem1_vec, twist1, stem2_vec, twist2):
 
     stem1_basis = cuv.create_orthonormal_basis(stem1_vec, twist1)
 
-    log.debug("Stem1 basis \n%s", stem1_basis)
+    log.debug("Stem1 basis \n{}".format(stem1_basis))
     # Transform the vector of stem2 to the new coordinate system
     stem2_new_basis = cuv.change_basis(stem2_vec, stem1_basis,
                                        cuv.standard_basis)
-    log.debug("Stem2 in basis of stem 1 %s", stem2_new_basis)
+    log.debug("Stem2 in basis of stem 1 {}".format(stem2_new_basis))
 
     twist2_new_basis = cuv.change_basis(twist2, stem1_basis,
                                         cuv.standard_basis)
@@ -250,7 +250,7 @@ def get_stem_orientation_parameters(stem1_vec, twist1, stem2_vec, twist2):
     # Convert the cartesian coordinates to polar coordinates
     (r, u, v) = cuv.spherical_cartesian_to_polar(stem2_new_basis)
     t = get_twist_parameter(twist1, twist2_new_basis, (u, v))
-    log.debug("r %s, u %s, v %s, t %s", r, u, v, t)
+    log.debug("r {}, u {}, v {}, t {}".format(r, u, v, t))
     return (r, u, v, t)
 
 
@@ -298,9 +298,9 @@ def get_stem_twist_and_bulge_vecs(bg, bulge, connections):
     # find out which sides of the stems are closest to the bulge
     # the results will be indexes into the mids array
     (s1b, s1e) = bg.get_sides(s1, bulge)
-    log.debug("Side of 1st stem %s attached to %s is %s ", s1, bulge, s1b)
+    log.debug("Side of 1st stem {} attached to {} is {} ".format(s1, bulge, s1b))
     (s2b, s2e) = bg.get_sides(s2, bulge)
-    log.debug("Side of 2nd stem %s attached to %s is %s ", s2, bulge, s2b)
+    log.debug("Side of 2nd stem {} attached to {} is {} ".format(s2, bulge, s2b))
 
     # Create directional vectors for the stems
     #  For ML:           For IL: -> -> ->
@@ -625,14 +625,14 @@ def stem_from_chains(cg, chains, elem_name):
     new_residue_ids = []
     for strand in residue_ids:
         for res_id in strand:
-            log.debug("Adding residue %s", res_id)
+            log.debug("Adding residue {}".format(res_id))
             original_residue = chains[res_id.chain][res_id.resid]
             residue = original_residue.copy()
             try:
                 stem_chain.add(residue)
             except Bio.PDB.PDBExceptions.PDBConstructionException as e:
                 log.info(
-                    "Temporarily changing resid %s to uuid, because this id is present twice (with different chain) in one stem", residue.id)
+                    "Temporarily changing resid {} to uuid, because this id is present twice (with different chain) in one stem".format(residue.id))
                 change_residue_id(residue, uuid.uuid4())
                 stem_chain.add(residue)
             new_residue_ids.append(residue.id)
@@ -660,7 +660,7 @@ def stem_from_chains(cg, chains, elem_name):
     try:
         start_vec1a = chains[first_res_a.chain][first_res_a.resid][REFERENCE_CATOM].coord - coords[0]
     except KeyError as e:
-        log.error("Atoms are %s", chains[first_res_a.chain][first_res_a.resid].child_dict)
+        log.error("Atoms are {}".format(chains[first_res_a.chain][first_res_a.resid].child_dict))
         raise
     last_res_a = residue_ids[1][0]
     end_vec1a = chains[last_res_a.chain][last_res_a.resid][REFERENCE_CATOM].coord - coords[1]
@@ -785,8 +785,7 @@ def virtual_res_3d_pos_core(coords, twists, i, stem_len, stem_inv=None):
              residue.
              Or, if i is a list, return a list of tuples.
     '''
-    log.debug("virtual_res_3d_pos_core called with %s, %s, %s, %s, %s",
-                coords, twists, i, stem_len, stem_inv)
+    log.debug("virtual_res_3d_pos_core called with {}, {}, {}, {}, {}".format(coords, twists, i, stem_len, stem_inv))
     stem_vec = coords[1] - coords[0]
 
     # the angle of the second twist with respect to the first
@@ -1091,15 +1090,15 @@ def add_virtual_residues(bg, element):
 def _add_loop_virtual_residues(cg, element):
     if not cg.chains:
         log.info(
-            "No virtual residues added for %s, because no pdb chain present", element)
+            "No virtual residues added for {}, because no pdb chain present".format(element))
         return
     for i, resid in enumerate(cg.define_residue_num_iterator(element, seq_ids=True)):
         try:
             global_coords = cg.chains[resid.chain][resid.resid]["C1'"].coord
         except KeyError:
-            log.warning("Added virtual residue position for residue %s will be "
-                      "inaccurate, because no C1' is present. Atoms are %s", resid,
-                      list(cg.chains[resid.chain][resid.resid].child_dict.keys()))
+            log.warning("Added virtual residue position for residue {} will be "
+                      "inaccurate, because no C1' is present. Atoms are {}".format(resid,
+                      list(cg.chains[resid.chain][resid.resid].child_dict.keys())))
             p=np.zeros(3)
             i=0
             for atom in cg.chains[resid.chain][resid.resid]:
@@ -1115,7 +1114,7 @@ def _add_loop_virtual_residues(cg, element):
 def _add_three_points_per_element(cg, element):
     if not cg.chains:
         log.info(
-            "No 3 ppints added for %s, because no pdb chain present", element)
+            "No 3 ppints added for {}, because no pdb chain present".format(element))
         return
 
     for i, resid in enumerate(cg.define_residue_num_iterator(element, seq_ids=True)):
@@ -1130,14 +1129,14 @@ def _add_three_points_per_element(cg, element):
             elif atom.name in ["P", "O5'", "OP1", "OP2"]:
                 phosphor_coord.append(atom.coord)
             else:
-                log.debug("Getting vbase coordinates: Ignoring atom: %s", atom.name)
+                log.debug("Getting vbase coordinates: Ignoring atom: {}".format(atom.name))
         for attr, coords in zip([cg.vbase, cg.vsugar, cg.vbackbone],
                                [base_coords, sugar_coords, phosphor_coord]):
             if len(coords) == 0:
-                log.warning("Cannot get 3 points for %s, %s (%s): "
-                            "only %s sugar atoms, %s base atoms and %s phosphor atoms",
-                            element, resid, repr(cg.chains[resid.chain][resid.resid]), len(sugar_coords), len(base_coords), len(phosphor_coord))
-                log.warning("atoms are %s", 
+                log.warning("Cannot get 3 points for {}, {} ({}): "
+                            "only {} sugar atoms, {} base atoms and {} phosphor atoms".format(
+                            element, resid, repr(cg.chains[resid.chain][resid.resid]), len(sugar_coords), len(base_coords), len(phosphor_coord)))
+                log.warning("atoms are " +
                             ", ".join(atom.name for atom in cg.chains[resid.chain][resid.resid]))
 
             else:
@@ -1219,7 +1218,7 @@ def stem_vres_reference_atoms(bg, s, i):
                 continue
             else:
                 new_c = cuv.change_basis(c - vpos, basis, cuv.standard_basis)
-                log.debug("Atom %s has coords %s", atom, new_c)
+                log.debug("Atom {} has coords {}".format(atom, new_c))
                 coords[strand][atom] = new_c
 
     return (vpos, basis, coords)
@@ -1472,7 +1471,7 @@ def add_loop_information_from_pdb_chains(bg):
                         REFERENCE_CATOM, len(list(chain.get_residues()))))
                     with log_to_exception(log, e):
                         log.error(
-                            "The chain's last residue only has the following atoms: %s", res.child_list)
+                            "The chain's last residue only has the following atoms: {}".format(res.child_list))
                         raise e
             centroid = get_furthest_c_alpha(bg, chain,
                                             first_res[REFERENCE_CATOM].get_vector(
@@ -1516,12 +1515,12 @@ def _add_loop_vres(cg):
             if elem[0] != "s":
                 _add_loop_virtual_residues(cg, elem)
         except:
-            log.exception("Could not add virtual residues from PDB for %s, elem %s", cg.name, elem)
+            log.exception("Could not add virtual residues from PDB for {}, elem {}".format(cg.name, elem))
         try:
-          log.debug("Add 3 points for elem %s", elem)
+          log.debug("Add 3 points for elem {}".format(elem))
           _add_three_points_per_element(cg, elem)
         except:
-            log.exception("Could not add 3 virtual points from PDB for %s, elem %s", cg.name, elem)
+            log.exception("Could not add 3 virtual points from PDB for {}, elem {}".format(cg.name, elem))
 
 def cylinder_works(cg, cylinders_to_stems, tv, c, r=4.):
     '''
@@ -1772,7 +1771,7 @@ class VirtualAtomsLookup(object):
             return e_coords
 
     def _getitem_for_stem(self, d, pos):
-        log.debug("getitem_for_stem %s, pos %s", d, pos)
+        log.debug("getitem_for_stem {}, pos {}".format(d, pos))
         pos_in_stem, side = self.cg.stem_resn_to_stem_vres_side(d, pos)
         assert pos >= 1
         try:
@@ -1859,7 +1858,7 @@ def get_basepair_center(cg, pos):
         for atom in atoms[seq2]:
             avpos += va2[atom]
     except KeyError:
-        log.error("%s\n%s", va1.keys(), va2.keys())
+        log.error("{}\n{}".format(va1.keys(), va2.keys()))
         raise
     avpos /= (len(atoms[seq1]) + len(atoms[seq2]))
     return avpos

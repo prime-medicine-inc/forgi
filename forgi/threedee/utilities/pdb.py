@@ -249,8 +249,8 @@ def residuelist_rmsd(c1_list, c2_list, sidechains=False, superimpose=True):
     import forgi.threedee.model.similarity as ftms
 
     if len(c1_list) != len(c2_list):
-        log.error("c1_list (len %s): %s", c1_list)
-        log.error("c2_list (len %s): %s", c2_list)
+        log.error("c1_list (len {}): {}".format(len(c1_list), c1_list))
+        log.error("c2_list (len {}): {}".format(len(c2_list), c2_list))
         raise Exception(
             "Chains of different length. (Maybe an RNA-DNA hybrid?)")
 
@@ -398,7 +398,7 @@ def output_multiple_chains(chains, filename, file_type="pdb"):
     m = bpdb.Model.Model(0)
     s = bpdb.Structure.Structure('stru')
     for chain in chains:
-        log.debug("Adding chain %s with %s residues", chain.id, len(chain))
+        log.debug("Adding chain {} with {} residues".format(chain.id, len(chain)))
         m.add(chain)
         if file_type=="pdb" and len(chain.id)!=1:
             raise ValueError("Cannot save chain with name %s (not a single character) "
@@ -415,7 +415,7 @@ def output_multiple_chains(chains, filename, file_type="pdb"):
         with log_to_exception(log, e):
             log.error("Could not output PDB with chains and residues:")
             for chain in s[0]:
-                log.error("%s: %s", chain.id, [r.id for r in chain])
+                log.error("{}: {}".format(chain.id, [r.id for r in chain]))
         raise
 
 
@@ -581,7 +581,7 @@ def _extract_asym_auth_id_map(cif_dict):
     for i, lid in enumerate(label_ids):
         if lid in l2a:
             if l2a[lid]!=auth_ids[i]:
-                log.error("lid %s, authid %s but before %s", lid, auth_ids[i], l2a[lid])
+                log.error("lid {}, authid {} but before {}".format(lid, auth_ids[i], l2a[lid]))
                 raise ValueError("Inconsistent cif.")
         else:
             l2a[lid]=auth_ids[i]
@@ -597,31 +597,30 @@ def _get_assemblies(chains, cifdict):
     assembly_gen = assemblies[assembly_nr]
     old_chains = { c.id:c for c in chains}
     new_chains = {}
-    log.debug("Original chains are %s. Now performing symmetry "
-              "for assembly %s", old_chains, assembly_nr)
-    log.debug("AG: %s",assembly_gen)
+    log.debug("Original chains are {}. Now performing symmetry for assembly {}".format(old_chains, assembly_nr))
+    log.debug("AG: {}".format(assembly_gen))
     for operations, labelids in assembly_gen[0].items():
         chainids = set(id2chainid[lid] for lid in labelids)
         lids_back = set( x for x in a2l for cid in chainids for a2l in chainid2ids[cid])
         if lids_back!=set(labelids):
-            log.error("%s, %s, extra: %s", lids_back, labelids, lids_back-set(labelids))
+            log.error("{}, {}, extra: {}".format(lids_back, labelids, lids_back-set(labelids)))
             raise ValueError("Operation on part of an author designated assymetric unit "
                              "(auth_asym_id) nt supported.")
         for chain_id in chainids:
             if chain_id not in old_chains:
-                log.debug ("Skipping chain %s: not RNA? chains: %s", chain_id, old_chains.keys())
+                log.debug ("Skipping chain {}: not RNA? chains: {}".format(chain_id, old_chains.keys()))
                 continue
             for op_id in op_ids:
-                log.debug("Applying op %s to %s", op_id, chain_id)
+                log.debug("Applying op {} to {}".format(op_id, chain_id))
                 if chain_id in new_chains:
                     chain = old_chains[chain_id].copy()
                     newid = _get_new_chainid(chain_id, op_id,
                                              set(old_chains.keys())| set(new_chains.keys()))
-                    log.debug("Setting id %s", newid)
+                    log.debug("Setting id {}".format(newid))
                     chain.id = newid
                     chain.transform(operation_mat[op_id], operation_vec[op_id])
                 new_chains[chain.id]=chain
-    log.debug("new_chains: %s", new_chains)
+    log.debug("new_chains: {}".format(new_chains))
     chains = list(new_chains.values())
     return chains
 
@@ -662,11 +661,11 @@ def get_all_chains(in_filename, parser=None, no_annotation=False, assembly_nr=No
 
     # Let's detach all H2O, to speed up processing.
     for chain in s[0]:
-        log.debug("Before detaching water from %s: chain has %s residues", chain.id, len(chain))
+        log.debug("Before detaching water from {}: chain has {} residues".format(chain.id, len(chain)))
         for r in chain.child_list[:]: # We need a copy here, because we are modifying it during iteration
             if r.resname.strip() == "HOH":
                 chain.detach_child(r.id)
-        log.debug("After detaching water from %s: chain has %s residues", chain.id, len(s[0][chain.id]))
+        log.debug("After detaching water from {}: chain has {} residues".format(chain.id, len(s[0][chain.id])))
 
     # Rename residues from other programs
     for chain in s[0]:
@@ -700,7 +699,7 @@ def get_all_chains(in_filename, parser=None, no_annotation=False, assembly_nr=No
     chains = list(chain for chain in s[0] if contains_rna(chain))
 
     try:
-        log.debug("PDB header %s", parser.header)
+        log.debug("PDB header {}".format(parser.header))
         mr = parser.header["missing_residues"]
         if assembly_nr is not None:
             warnings.warn("Getting an assembly is not supported for the old PDB format.")
@@ -773,8 +772,8 @@ def get_all_chains(in_filename, parser=None, no_annotation=False, assembly_nr=No
         if residues_interact(rna_res, other_res):
             log.error("%s and %s interact", rna_res, other_res)
             interacting_residues.add(rna_res)'''
-    log.debug("LOADING DONE: chains %s, mr %s, ir: %s",
-             chains, mr, interacting_residues)
+    log.debug("LOADING DONE: chains {}, mr {}, ir: {}".format(
+             chains, mr, interacting_residues))
     return chains, mr, interacting_residues
 
 
@@ -855,14 +854,14 @@ def enumerate_interactions_kdtree(model):
             other_res = res2
         if rna_res is None or other_res is None:
             continue
-        log.debug("%s(chain %s) and %s(chain %s, resname %s) are close", rna_res,rna_res.parent.id,other_res, other_res.parent.id, other_res.resname.strip())
+        log.debug("{}(chain {}) and {}(chain {}, resname {}) are close".format(
+            rna_res,rna_res.parent.id,other_res, other_res.parent.id, other_res.resname.strip()))
         # Only consider C and N. So no ions etc
         if any(a.name[0] in ["C", "N"] for a in other_res.get_atoms()):
             interacting_residues.add(rna_res)
         else:
-            log.debug("but %s has wrong atoms %s", other_res,
-                      list(a.name for a in other_res.get_atoms()))
-    log.debug("Interacting: %s", interacting_residues)
+            log.debug("but {} has wrong atoms {}".format(other_res, list(a.name for a in other_res.get_atoms())))
+    log.debug("Interacting: {}".format(interacting_residues))
     return interacting_residues
 
 
@@ -1012,8 +1011,8 @@ def annotate_fallback(chain_list):
                 basepairs[res1_id] = res2_id
                 basepairs[res2_id] = res1_id
         except KeyError as e:
-            log.debug("Missing atom %s. %s has atoms %s, %s has atoms %s",
-                      e, res1, res1.child_dict, res2, res2.child_dict)
+            log.debug("Missing atom {}. {} has atoms {}, {} has atoms {}".format(
+                e, res1, res1.child_dict, res2, res2.child_dict))
             pass
 
     seq_ids = []

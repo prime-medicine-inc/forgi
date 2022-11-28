@@ -107,11 +107,11 @@ def describe_rna(cg, file_num, dist_pais, angle_pairs):
                                      cg.get_virtual_residue(int(to_nt), True))
         except Exception as e:
             dist = float("nan")
-            log.warning("%d%s File %s: Could not calculate distance between "
-                        "%d and %d: %s occurred: %s", file_num,
+            log.warning("{}{} File {}: Could not calculate distance between "
+                        "{} and {}: {} occurred: {}".format(file_num,
                         {1: "st", 2: "nd", 3: "rd"}.get(
                             file_num % 10 * (file_num % 100 not in [11, 12, 13]), "th"),
-                        cg.name, from_nt, to_nt, type(e).__name__, e)
+                        cg.name, from_nt, to_nt, type(e).__name__, e))
         data["distance_{}_{}".format(from_nt, to_nt)] = dist
     for elem1, elem2 in angle_pairs:
         try:
@@ -119,11 +119,11 @@ def describe_rna(cg, file_num, dist_pais, angle_pairs):
                                    cg.coords.get_direction(elem2))
         except Exception as e:
             angle = float("nan")
-            log.warning("%d%s File %s: Could not calculate angle between "
-                        "%s and %s: %s occurred: %s", file_num,
+            log.warning("{}{} File {}: Could not calculate angle between "
+                        "{} and {}: {} occurred: {}".format(file_num,
                         {1: "st", 2: "nd", 3: "rd"}.get(
                             file_num % 10 * (file_num % 100 not in [11, 12, 13]), "th"),
-                        cg.name, elem1, elem2, type(e).__name__, e)
+                        cg.name, elem1, elem2, type(e).__name__, e))
         data["angle_{}_{}".format(elem1, elem2)] = angle
     data["missing_residues_5prime"] = (len(cg.seq.with_missing[:1]) - 1)
     data["missing_residues_3prime"] = (
@@ -310,8 +310,8 @@ def number_by(data, sorting_column="loop_start_after", only_for_col="is_pseudokn
             out_column.append(sorted_vals.index(data[sorting_column][i]) + 1)
         else:
             out_column.append(0)
-    log.info("number_by column is %s, len(data[%s])=%s)", out_column, sorting_column, len(
-        data[sorting_column]))
+    log.info("number_by column is {}, len(data[{}])={})".format(out_column, sorting_column, len(
+        data[sorting_column])))
     return out_column
 
 
@@ -335,8 +335,8 @@ if __name__ == "__main__":
         angle_pairs = []
     for i, cg in enumerate(cgs):
         file_num = i + 1
-        log.info("Describing the %d%s cg %s", file_num, {1: "st", 2: "nd", 3: "rd"}.get(
-            file_num % 10 * (file_num % 100 not in [11, 12, 13]), "th"), cg.name)
+        log.info("Describing the {}{} cg {}".format(file_num, {1: "st", 2: "nd", 3: "rd"}.get(
+            file_num % 10 * (file_num % 100 not in [11, 12, 13]), "th"), cg.name))
         try:
             key = {"name": cg.name, "filename": filenames[i]}
             if args.per_ml:
@@ -354,8 +354,8 @@ if __name__ == "__main__":
                     data[k].append(v)
         except Exception as e:
             with log_to_exception(log, e):
-                log.error("Error occurred during describing %d%s cg %s", file_num, {1: "st", 2: "nd", 3: "rd"}.get(
-                    file_num % 10 * (file_num % 100 not in [11, 12, 13]), "th"), cg.name)
+                log.error("Error occurred during describing {}{} cg {}".format(file_num, {1: "st", 2: "nd", 3: "rd"}.get(
+                    file_num % 10 * (file_num % 100 not in [11, 12, 13]), "th"), cg.name))
             raise
     if args.keys:
         allowed_keys = args.keys.split(",") + ["name"]

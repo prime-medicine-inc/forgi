@@ -69,9 +69,9 @@ class BulgeGraph(BaseGraph):
         self.build_order = None
         if name is None:
             self.name = "untitled"
-            log.info("No name given. name was set to %s", self.name)
+            log.info(f"No name given. name was set to {self.name}")
         else:
-            log.debug("Setting name to %s", name)
+            log.debug(f"Setting name to {name}")
             self.name = name
         #: The coarse grain element definitions: Keys are for example 's1'/ 'm2'/ 'h3'/ 'f1'/ 't1'
         #: Values are the positions in the sequence (1D-coordinate) of start , end, ...
@@ -113,7 +113,7 @@ class BulgeGraph(BaseGraph):
                     If it is None, the sequence will be all 'N's
         :param name: Optional string to use as molecule name.
         """
-        log.debug("From dotbracket %s", dotbracket_str)
+        log.debug("From dotbracket {}".format(dotbracket_str))
         pt = fus.dotbracket_to_pairtable(dotbracket_str)
         tuples = fus.pairtable_to_tuples(pt)
         if not isinstance(seq, Sequence):
@@ -122,7 +122,7 @@ class BulgeGraph(BaseGraph):
             seq_ids = _seq_ids_from_seq_str(seq)
             seq = Sequence(seq, seq_ids)
         graph_constr = _BulgeGraphConstruction(tuples)
-        log.debug("Defines are %s", graph_constr.defines)
+        log.debug("Defines are {}".format(graph_constr.defines))
         bg = cls(graph_constr, seq, name)
         return _cleaned_bg(bg, dissolve_length_one_stems, remove_pseudoknots)
 
@@ -230,8 +230,7 @@ class BulgeGraph(BaseGraph):
         bg = cls(graph_constr, seq, name)
         bg = _cleaned_bg(bg, dissolve_length_one_stems, remove_pseudoknots)
         if log.isEnabledFor(logging.INFO):
-            log.info("From bpseq_str: Secondary structure: %s",
-                     bg.to_dotbracket_string())
+            log.info(f"From bpseq_str: Secondary structure: {bg.to_dotbracket_string()}")
         return bg
 
     @classmethod
@@ -437,7 +436,7 @@ class BulgeGraph(BaseGraph):
                              Indicating that the first stem is named 's0', followed by 'i0','
                              s1', 'h0', the second strand of 's1' and the second strand of 's0'
         """
-        log.debug("To element_string from defines %s", self.defines)
+        log.debug("To element_string from defines {}".format(self.defines))
         output_str = [' '] * (self.seq_length + 1)
         output_nr = [' '] * (self.seq_length + 1)
         for d in self.defines.keys():
@@ -496,7 +495,7 @@ class BulgeGraph(BaseGraph):
                 node_dims = "({})".format(node_dims[1])
             elif node_dims[1] == -1 or node_dims[1] == 1000:
                 node_dims = "({})".format(node_dims[0])
-            log.info("Dims of node %s are %r", key2, node_dims)
+            log.info(f"Dims of node {key2} are {node_dims}")
             out[-1] += str(node_dims)
 
             # make bigger interior loops visually bigger
@@ -900,7 +899,7 @@ class BulgeGraph(BaseGraph):
             return (self.stem_length(node), self.stem_length(node))
         else:
             bd = self.get_bulge_dimensions(node, with_missing)
-            log.debug("BulgeDimensions of %s are %s", node, bd)
+            log.debug(f"BulgeDimensions of {node} are {bd}")
             return bd
 
     def get_bulge_dimensions(self, bulge, with_missing=False):
@@ -934,7 +933,7 @@ class BulgeGraph(BaseGraph):
             # 15 20
             s1 = self.defines[c[0]]
             s2 = self.defines[c[1]]
-            log.debug("Getting bulge dimensions for %s", bulge)
+            log.debug(f"Getting bulge dimensions for {bulge}")
             return get_define_len([s1[1] + 1, s2[0] - 1]), get_define_len([s2[3] + 1, s1[2] - 1])
         else:
             if bd:
@@ -979,14 +978,13 @@ class BulgeGraph(BaseGraph):
         """
         Get a define including the adjacent nucleotides.
         """
-        log.debug("define_a nonzero of BulgeGraph called for %s", elem)
+        log.debug("define_a nonzero of BulgeGraph called for {}".format(elem))
         define = self.defines[elem]
         new_def = []
         for i in range(0, len(define), 2):
             if define[i] - 1 in self.seq.backbone_breaks_after:
-                log.debug("Left-side adjacent nt is in "
-                          "backbone-breaks: %s in %s", define[i] - 1,
-                          self.seq.backbone_breaks_after)
+                log.debug(f"Left-side adjacent nt is in backbone-breaks: "
+                          f"{define[i] - 1} in {self.seq.backbone_breaks_after}")
                 new_def.append(define[i])
             else:
                 new_def.append(max(define[i] - 1, 1))
@@ -1033,7 +1031,7 @@ class BulgeGraph(BaseGraph):
         if isinstance(position, RESID):
             position = self.seq.to_integer(position)
         if not isinstance(position, int):
-            raise TypeError("Wrong type of position %s, not int or RESID but %s", position, type(position).__name__)
+            raise TypeError("Wrong type of position {}, not int or RESID but {}".format(position, type(position).__name__))
         if position not in self._node_to_resnum:
             self._node_to_resnum[position] = super(
                 BulgeGraph, self).get_node_from_residue_num(position)
@@ -1122,15 +1120,15 @@ class BulgeGraph(BaseGraph):
         :param vertex: The name of the vertex to find the loop.
         :return: A list containing the elements in the shortest cycle.
         """
-        log.debug("Starting shortest BG loop for %s", vertex)
+        log.debug("Starting shortest BG loop for {}".format(vertex))
         G = self.to_networkx()
-        log.debug("nx graph  %r with edges %r ", G, G.adj)
+        log.debug(f"nx graph  {G} with edges {G.adj}")
 
         # use the nucleotide in the middle of this element as the starting point
         residues = sorted(
             list(self.define_residue_num_iterator(vertex, adjacent=True)))
         mid_res = residues[len(residues) // 2]
-        log.debug("mid_residue %s", mid_res)
+        log.debug("mid_residue {}".format(mid_res))
         if len(residues) == 2:
             # no-residue multiloop
             # find the neighbor which isn't part of the multiloop
@@ -1146,7 +1144,7 @@ class BulgeGraph(BaseGraph):
         import forgi.utilities.graph as fug
 
         path = fug.shortest_cycle(G, mid_res)
-        log.debug("Shortest cycle is %s", path)
+        log.debug("Shortest cycle is {}".format(path))
         return path
 
     def _chain_start_end(self, pos):
@@ -1174,7 +1172,7 @@ class BulgeGraph(BaseGraph):
         If there is no other single stranded RNA after the stem, the backbone must end there.
         In that case return None.
         """
-        log.debug("get_next_ml_segment called for %s", ml_segment)
+        log.debug("get_next_ml_segment called for {}".format(ml_segment))
         if ml_segment.startswith("t"):
             return None
         else:
@@ -1202,16 +1200,14 @@ class BulgeGraph(BaseGraph):
             else:
                 assert False
 
-        log.debug("flanking_nuc_at_stem_side called for %s, side %s with defines %s.",
-                  s, side_stem, self.defines[s])
+        log.debug(f"flanking_nuc_at_stem_side called for {s}, side {side_stem} with defines {self.defines[s]}.")
         ml_nuc = self.flanking_nuc_at_stem_side(s, side_stem)
-        log.debug("ml_nucleotide is %s (sequence length is %s).",
-                  ml_nuc, self.seq_length)
+        log.debug(f"ml_nucleotide is {ml_nuc} (sequence length is {self.seq_length}).")
         # End of the backbone
         if ml_nuc > self.seq_length or ml_nuc - 1 in self.backbone_breaks_after:
             return None
         elem = self.get_node_from_residue_num(ml_nuc)
-        log.debug("side now %s, ml_nuc %s, ml %s", side_stem, ml_nuc, elem)
+        log.debug(f"side now {side_stem}, ml_nuc {ml_nuc}, ml {elem}")
         if elem[0] == "s":
             # 0-length multiloop
             elems = self.edges[elem] & self.edges[s]
@@ -1221,7 +1217,7 @@ class BulgeGraph(BaseGraph):
             assert False
         if elem[0] not in "mft":
             self.log()
-            log.error("%s is not a multiloop node", elem)
+            log.error(f"{elem} is not a multiloop node")
             assert False
         return elem
 
@@ -1314,7 +1310,7 @@ class BulgeGraph(BaseGraph):
         if log.isEnabledFor(logging.WARNING):
             if len(stems_to_dissolve) == len(list(self.stem_iterator())) != 0:
                 log.warning("All stems of the structure have length 1!")
-        log.info("Stems with length 1: %s", stems_to_dissolve)
+        log.info("Stems with length 1: {}".format(stems_to_dissolve))
         bps_to_dissolve = []
         for s in stems_to_dissolve:
             bps_to_dissolve.extend(self.stem_bp_iterator(s))
@@ -1556,7 +1552,7 @@ class BulgeGraph(BaseGraph):
             if abs(self.defines[stem1][k] - self.defines[stem2][l]) == 1:
                 d = [self.defines[stem1][k], self.defines[stem2][l]]
                 d.sort()
-                log.debug("Zero-length element found: %s", d)
+                log.debug(f"Zero-length element found: {d}")
                 if d[0] not in self.seq.backbone_breaks_after:
                     zl_coordinates.add(tuple(d))
                 else:
@@ -1570,8 +1566,8 @@ class BulgeGraph(BaseGraph):
             es = self.to_element_string(with_numbers=True).split("\n")
             log.log(level, es[0])
             log.log(level, es[1])
-            log.log(level, "DEFINES: %s", pformat(self.defines))
-            log.log(level, "EDGES: %s", pformat(self.edges))
+            log.log(level, "DEFINES: {}".format(pformat(self.defines)))
+            log.log(level, "EDGES: {}".format(pformat(self.edges)))
 
     def sorted_stem_iterator(self):
         """
@@ -2088,7 +2084,7 @@ class BulgeGraph(BaseGraph):
                         res_id = self.seq.to_resid(x)
                     except IndexError as e:
                         with log_to_exception(log, e):
-                            log.error("Index %s not in seq_ids.", (x - 1))
+                            log.error(f"Index {x-1} not in seq_ids.")
                         raise
                     if hasattr(self, "chain") and self.chain is not None:
                         assert res_id in self.chain
@@ -2103,10 +2099,10 @@ class BulgeGraph(BaseGraph):
     def _insert_cutpoints_into_seq(self):
         if self.seq:
             for breakpoint in self.backbone_breaks_after:
-                log.debug("Inserting breakpoint into seq '%s'", self.seq)
+                log.debug(f"Inserting breakpoint into seq '{self.seq}'")
                 self.seq = self.seq.subseq_with_cutpoints(
                     1, breakpoint + 1) + "&" + self.seq.subseq_with_cutpoints(breakpoint + 1, None)
-                log.info("seq now has %s cutpoints", self.seq.count('&'))
+                log.info(f"seq now has {self.seq.count('&')} cutpoints")
 
     # This function seems to be dead code, but might be useful in the future.
     # Consider adding this to whitelist.py
@@ -2296,7 +2292,7 @@ class BulgeGraph(BaseGraph):
             assert len(self.defines) == 0
             return
         while True:
-            log.debug("Yielding node %s with edges %s", node, self.edges[node])
+            log.debug(f"Yielding node {node} with edges {self.edges[node]}")
             yield node
             if node[0] in "si":  # The strand matters
                 if node[0] == "s":
@@ -2322,13 +2318,12 @@ class BulgeGraph(BaseGraph):
                     intersect = self.edges[node] & self.edges[next_node]
                     for el in intersect:
                         if el[0] == "m" and self.defines[el] == []:
-                            log.debug("ML %s between %s and %s: %s", el,
-                                      node, next_node, self.define_a(el))
+                            log.debug(f"ML {el} between {node} and {next_node}: {self.define_a(el)}")
                     for el in intersect:
                         if el[0] == "m" and self.defines[el] == []:
                             # In case of this structuire ([)], there are 2 0-length multiloops between the two stems.
                             prev_nuc = min(self.flanking_nucleotides(el))
-                            log.debug("prev_nuc = %s", prev_nuc)
+                            log.debug(f"prev_nuc = {prev_nuc}")
                             if nuc - 1 == prev_nuc:
                                 node = el
                                 break
@@ -2351,7 +2346,7 @@ class BulgeGraph(BaseGraph):
                     else:
                         nuc = f2
                 node = self.get_node_from_residue_num(nuc)
-                log.debug("Next nuc is %s (%s), node is %s", nuc, repr(nuc), node)
+                log.debug(f"Next nuc is {nuc} ({repr(nuc)}), node is {node}")
 
     def pseudoknotted_basepairs(self, ignore_basepairs=()):
         """
@@ -2419,7 +2414,7 @@ class BulgeGraph(BaseGraph):
                 d2_corners=self.define_a(e2)
                 correction+=1
 
-        log.debug("Corners for distance are %s and %s", d1_corners, d2_corners)
+        log.debug(f"Corners for distance are {d1_corners} and {d2_corners}")
         import networkx as nx
 
         G = self.to_networkx()
@@ -2667,7 +2662,7 @@ def _cleaned_bg(bg, dissolve_length_one_stems=False,
                                conflicting basepairs.
     :returns: A modified copy of or a reference to the original BulgeGraph
     """
-    log.debug("Cleaning BG with type %s", type(bg).__name__)
+    log.debug(f"Cleaning BG with type {type(bg).__name__}", )
     bps_to_remove = []
     if dissolve_length_one_stems:
         bps_to_remove.extend(bg.length_one_stem_basepairs())
@@ -2675,12 +2670,11 @@ def _cleaned_bg(bg, dissolve_length_one_stems=False,
         bps_to_remove.extend(bg.pseudoknotted_basepairs(
             ignore_basepairs=bps_to_remove))
     if bps_to_remove:
-        log.info("Recreating without the following "
-                 "basepairs: %s", bps_to_remove)
+        log.info(f"Recreating without the following basepairs: {bps_to_remove}")
         new_tuples = bg.to_pair_tuples(bps_to_remove)
         c = _BulgeGraphConstruction(new_tuples)
         # Create and init new object with only the Structure changed.
         return type(bg)(c, bg.seq, bg.name, bg.infos)
     else:
-        log.debug("Cleaning bg is no-op, returning bg with defines %s", bg.defines)
+        log.debug("Cleaning bg is no-op, returning bg with defines {}".format(bg.defines))
         return bg

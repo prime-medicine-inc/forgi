@@ -90,7 +90,6 @@ def circles(x, y, s, c='b', ax=None, vmin=None, vmax=None,labels=[], **kwargs):
 def _clashfree_annot_pos(pos, coords):
     for c in coords:
         dist = ftuv.vec_distance(c, pos)
-        #log.debug("vec_dist=%s", dist)
         if dist<14:
             return False
     return True
@@ -117,15 +116,13 @@ def _annotate_rna_plot(ax, cg, coords, annotations, text_kwargs):
             norm_vec = (stem_vec[1], -stem_vec[0])
             norm_vec/=ftuv.magnitude(norm_vec)
             annot_pos = np.array(stem_center)+23*norm_vec
-            #log.debug("Checking clashfree for %s, %s", stem, annot_pos)
             if not _clashfree_annot_pos(annot_pos, coords):
-                log.debug("Cannot annotate %s as %s ON THE RIGHT HAND SIDE, because of insufficient space. Trying left side...", stem, annot_dict[stem])
+                log.debug("Cannot annotate {} as {} ON THE RIGHT HAND SIDE, because of insufficient space. Trying left side...".format(
+                    stem, annot_dict[stem]))
                 annot_pos = np.array(stem_center)-23*norm_vec
-                #log.debug("Checking clashfree OTHER SIDE for %s, %s", stem, annot_pos)
                 if not _clashfree_annot_pos(annot_pos, coords):
-                    log.info("Cannot annotate %s as '%s', because of insufficient space.", stem, annot_dict[stem])
+                    log.info("Cannot annotate {} as '{}', because of insufficient space.".format(stem, annot_dict[stem]))
                     annot_pos = None
-            #log.debug("%s", annot_pos)
             if annot_pos is not None:
                 ax.annotate(annot_dict[stem], xy=annot_pos,
                             ha="center", va="center", **text_kwargs )
@@ -138,7 +135,7 @@ def _annotate_rna_plot(ax, cg, coords, annotations, text_kwargs):
             ax.annotate(annot_dict[hloop], xy=annot_pos,
                         ha="center", va="center", **text_kwargs )
         else:
-            log.info("Cannot annotate %s as '%s' ON THE INSIDE, because of insufficient space. Trying outside...", hloop, annot_dict[hloop])
+            log.info("Cannot annotate {} as '{}' ON THE INSIDE, because of insufficient space. Trying outside...".format(hloop, annot_dict[hloop]))
             nt1, nt2 = cg.define_a(hloop)
             start = np.mean([coords[nt1-1], coords[nt2-1]], axis=0)
             vec = annot_pos-start
@@ -147,7 +144,7 @@ def _annotate_rna_plot(ax, cg, coords, annotations, text_kwargs):
                 ax.annotate(annot_dict[hloop], xy=annot_pos,
                             ha="center", va="center", **text_kwargs )
             else:
-                log.info("Cannot annotate %s as '%s', because of insufficient space.", hloop, annot_dict[hloop])
+                log.info("Cannot annotate {} as '{}', because of insufficient space.".format(hloop, annot_dict[hloop]))
     for iloop in cg.iloop_iterator():
         s1, s2 = cg.connections(iloop)
         annot_pos = np.mean([ stem_coords[s1][2], stem_coords[s2][0]], axis=0)
@@ -155,7 +152,7 @@ def _annotate_rna_plot(ax, cg, coords, annotations, text_kwargs):
             ax.annotate(annot_dict[iloop], xy=annot_pos,
                         ha="center", va="center", **text_kwargs )
         else:
-            log.debug("Cannot annotate %s as '%s' ON THE INSIDE, because of insufficient space. Trying outside...", iloop, annot_dict[iloop])
+            log.debug("Cannot annotate {} as '{}' ON THE INSIDE, because of insufficient space. Trying outside...".format(iloop, annot_dict[iloop]))
             loop_vec = stem_coords[s2][0] - stem_coords[s1][2]
             norm_vec = (loop_vec[1], -loop_vec[0])
             norm_vec/=ftuv.magnitude(norm_vec)
@@ -175,14 +172,14 @@ def _annotate_rna_plot(ax, cg, coords, annotations, text_kwargs):
                     ax.annotate(annot_dict[iloop], xy=annot_pos_p,
                                 ha="center", va="center", **text_kwargs )
                 else:
-                    log.info("Cannot annotate %s as '%s' (only trying inside and right side), because of insufficient space.", iloop, annot_dict[iloop])
+                    log.info("Cannot annotate {} as '{}' (only trying inside and right side), because of insufficient space.".format(iloop, annot_dict[iloop]))
 
             else:
                 if _clashfree_annot_pos(annot_pos_m, coords):
                     ax.annotate(annot_dict[iloop], xy=annot_pos_m,
                                 ha="center", va="center", **text_kwargs )
                 else:
-                    log.info("Cannot annotate %s as '%s' (only trying inside and left side), because of insufficient space.", iloop, annot_dict[iloop])
+                    log.info("Cannot annotate {} as '{}' (only trying inside and left side), because of insufficient space.".format(iloop, annot_dict[iloop]))
     for mloop in itertools.chain(cg.floop_iterator(), cg.tloop_iterator(), cg.mloop_iterator()):
         nt1, nt2 = cg.define_a(mloop)
         res = list(cg.define_residue_num_iterator(mloop))
@@ -202,7 +199,7 @@ def _annotate_rna_plot(ax, cg, coords, annotations, text_kwargs):
             ax.annotate(annot_dict[mloop], xy=annot_pos,
                         ha="center", va="center", **text_kwargs )
         else:
-            log.info("Cannot annotate %s as '%s' , because of insufficient space.", mloop, annot_dict[mloop])
+            log.info("Cannot annotate {} as '{}' , because of insufficient space.".format(mloop, annot_dict[mloop]))
 
 def plot_rna(cg, ax=None, offset=(0, 0), text_kwargs={}, backbone_kwargs={},
              basepair_kwargs={}, color=True, lighten=0, annotations={}):
@@ -372,7 +369,7 @@ def _find_annot_pos_on_circle(nt, coords, cg):
                                      vec[0]*math.sin(a)+vec[1]*math.cos(a)])
             annot_pos = coords[nt-1]+rotated_vec*18
             if _clashfree_annot_pos(annot_pos, coords):
-                log.debug("Annot pos on c is %s",annot_pos)
+                log.debug("Annot pos on c is {}".format(annot_pos))
                 return annot_pos
     return None
 

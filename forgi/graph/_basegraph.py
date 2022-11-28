@@ -80,8 +80,7 @@ class BaseGraph(object):
         set_adjacent = set(self.define_a(d))
         set_not_adjacent = set(self.defines[d])
         flanking = list(sorted(set_adjacent - set_not_adjacent))
-        log.debug("Flanking nts are %s - %s = %s",
-                  set_adjacent, set_not_adjacent, flanking)
+        log.debug(f"Flanking nts are {set_adjacent} - {set_not_adjacent} = {flanking}")
         return flanking
 
     def _define_a_zerolength(self, elem):  # TODO speed-up by caching
@@ -107,8 +106,8 @@ class BaseGraph(object):
             stem1, stem2 = edges
             # See if this is the only element connecting the two stems.
             connections = self.edges[stem1] & self.edges[stem2]
-            log.debug("Stems %s and %s, connected by %s have the following common edges: %s with defines %s",
-                      stem1, stem2, elem, connections, list(map(lambda x: self.defines[x], connections)))
+            log.debug(f"Stems {stem1} and {stem2}, connected by {elem} have the following common edges: "
+                      f"{connections} with defines {list(map(lambda x: self.defines[x], connections))}")
             zl_connections = []
             for conn in connections:
                 if self.defines[conn] == []:
@@ -118,8 +117,7 @@ class BaseGraph(object):
             zl_connections.sort()
             log.debug("Getting zl-coordinates")
             zl_coordinates = self._zerolen_defines_a_between(stem1, stem2)
-            log.debug("Comparing zl-coordinates %s with connections %s",
-                      zl_coordinates, zl_connections)
+            log.debug(f"Comparing zl-coordinates {zl_coordinates} with connections {zl_connections}")
             if len(zl_connections) != len(zl_coordinates):
                 raise GraphIntegrityError("Expecting stems {} and {} to have {} zero-length "
                                           "connections at nucleotide positions {}, however, "
@@ -141,9 +139,9 @@ class BaseGraph(object):
             if abs(self.defines[stem1][k] - self.defines[stem2][l]) == 1:
                 d = [self.defines[stem1][k], self.defines[stem2][l]]
                 d.sort()
-                log.debug("Zero-length element found: %s", d)
+                log.debug(f"Zero-length element found: {d}")
                 zl_coordinates.add(tuple(d))
-        log.debug("Returning zl-coordinates: %s", zl_coordinates)
+        log.debug(f"Returning zl-coordinates: {zl_coordinates}")
         return zl_coordinates
 
     def _get_sides_plus(self, s1, bulge):

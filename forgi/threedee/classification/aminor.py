@@ -124,8 +124,8 @@ def all_interactions(cg, clfs=None):
     interactions = []
     for loop_type in ["i", "h"]:
         if clfs is not None and loop_type not in clfs:
-            warnings.warn("No classifier specified for loop type %s (only for %s), "
-                          "using default classifier.", loop_type, ",".join(clfs.keys()))
+            warnings.warn("No classifier specified for loop type {} (only for {}), "
+                          "using default classifier.".format(loop_type, ",".join(clfs.keys())))
         if clfs is None or loop_type not in clfs:
             clf = _get_default_clf(loop_type)
         else:
@@ -246,8 +246,8 @@ class AMinorClassifier(BaseEstimator, ClassifierMixin):
         """
         # Check that X and y have correct shape
         X, y = check_X_y(X, y)
-        log.info("Trainings-data has shape %s", X.shape)
-        log.info("We have %s known interactions ", sum(y))
+        log.info("Trainings-data has shape {}".format(X.shape))
+        log.info("We have {} known interactions ".format(sum(y)))
         if X.shape[1] != 3:
             raise TypeError(
                 "Expect exactly 3 features, found {}".format(X.shape[1]))
@@ -258,7 +258,7 @@ class AMinorClassifier(BaseEstimator, ClassifierMixin):
         if self.symmetric:
             ame = self._make_symmetric(ame)
             non_ame = self._make_symmetric(non_ame)
-        log.info("Fitting. First positive sample: %s", X[np.where(y)][0])
+        log.info("Fitting. First positive sample: {}".format(X[np.where(y)][0]))
         self.ame_kde_ = KernelDensity(kernel=self.kernel,
                                       bandwidth=self.bandwidth).fit(ame).score_samples
         self.non_ame_kde_ = KernelDensity(kernel=self.kernel,
@@ -305,7 +305,7 @@ class AMinorClassifier(BaseEstimator, ClassifierMixin):
     def predict_proba(self, X):
         check_is_fitted(self, ['ame_kde_', 'non_ame_kde_'])
         X = check_array(X)
-        log.debug("Predicting for %s", X)
+        log.debug("Predicting for {}".format(X))
         numerator = np.exp(self.ame_kde_(X)) * self.p_I
         denom = numerator + np.exp(self.non_ame_kde_(X)) * (1 - self.p_I)
         with warnings.catch_warnings():  # division by 0
@@ -430,9 +430,9 @@ def _classify_potential_interactions(clf, geos, labels):
         return []
     score = clf.predict_proba(geos)
     y = score > 0.5
-    log.info("Classifying %s", labels)
-    log.info("score %s", score)
-    log.info("# hits (not unique)=%s", sum(y))
+    log.info("Classifying {}".format(labels))
+    log.info("score {}".format(score))
+    log.info("# hits (not unique)={}".format(sum(y)))
     # We modelled the probabilities in a way that each loop can have only 1 interaction.
     # So for multiple interactions, use only the best one.
     best_interactions = {}
@@ -442,7 +442,7 @@ def _classify_potential_interactions(clf, geos, labels):
             continue
         if loop not in best_interactions or score[i] > best_interactions[loop][0]:
             best_interactions[loop] = (score[i], label)
-    log.info("%s unique interacting loops.", len(best_interactions))
+    log.info("{} unique interacting loops.".format(len(best_interactions)))
     log.debug(best_interactions)
     return [best_i[1] for best_i in best_interactions.values()]
 

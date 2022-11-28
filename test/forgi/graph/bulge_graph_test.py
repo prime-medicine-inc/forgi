@@ -244,7 +244,7 @@ class BulgeGraphCofoldOverallTest(GraphVerification):
         self.assertEqual(bg.backbone_breaks_after, [3])
         log.debug("Now exporting to bg_string")
         bgstri = bg.to_bg_string()
-        log.debug("bg_string is %s", bgstri)
+        log.debug("bg_string is {}".format(bgstri))
         bg = fgb.BulgeGraph.from_bg_string(bgstri)
         self.assertEqual(bg.backbone_breaks_after, [3])
 
@@ -999,7 +999,7 @@ AAAAAAAAAAAAAAAAAAAAAAAAAAA
 
         # secondary structure taken from 1y26
         bg = fgb.BulgeGraph.from_dotbracket('((..))')
-        log.debug("bg.defines %s", bg.defines)
+        log.debug("bg.defines {}".format(bg.defines))
         elem_str = bg.to_element_string()
         self.assertEquals(elem_str, "sshhss")
 
@@ -1589,7 +1589,7 @@ AAAAAAAAAAAAAAAAAAAAAAAAAA
         bg, = fgb.BulgeGraph.from_fasta_text(fasta)
         loops = bg.find_mlonly_multiloops()
         for loop in loops:
-            log.info("%s, %s", loop, bg.describe_multiloop(loop))
+            log.info(f"{loop}, {bg.describe_multiloop(loop)}")
             self.assertTrue(bg.is_loop_pseudoknot(loop))
 
     def test_is_loop_pseudoknot_no_pk(self):
@@ -1612,7 +1612,7 @@ AAAAAAAAAAAAAAAAAAAAAAAAAA
         loops = bg.find_mlonly_multiloops()
         for loop in loops:
             if bg.is_loop_pseudoknot(loop):
-                log.error("%s is PK", loop)
+                log.error("{} is PK".format(loop))
             self.assertFalse(bg.is_loop_pseudoknot(loop))
 
     def test_pseudoknotted_basepairs(self):
@@ -1894,8 +1894,7 @@ GCGCGGCACCGUCCGCGGAACAAACGG
         bg = fgb.BulgeGraph.from_dotbracket(db)
         dom = bg.get_domains()
         bg.log(logging.INFO)
-        log.info("m4: %s %s %s", bg.connections("m4"), bg.get_angle_type(
-            "m4"), bg.get_angle_type("m4", allow_broken=True))
+        log.info(f"m4: {bg.connections('m4')} {bg.get_angle_type('m4')} {bg.get_angle_type('m4', allow_broken=True)}")
         mls = sorted([
             sorted(['f0', 't0']),
             sorted(['m0', 'm1', 'm2', 'm6']),
@@ -1912,7 +1911,7 @@ GCGCGGCACCGUCCGCGGAACAAACGG
             sorted(['s10', 'h3'], key=lambda x: bg.define_a(x))
         ])
         self.assertEqual(dom["multiloops"], mls)
-        log.debug("Comparing rods %s and %s", dom["rods"], rods)
+        log.debug("Comparing rods {} and {}".format(dom["rods"], rods))
         self.assertEqual(dom["rods"], rods)
         self.assertEqual(dom["pseudoknots"], [])
 

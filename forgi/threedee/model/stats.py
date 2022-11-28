@@ -279,7 +279,7 @@ class AngleStat(object):
 
         self.define = list(map(int, parts[11:11 + def_len]))
         self.seq = parts[11 + def_len]
-        log.debug("len(parts)=%s, def_len=%s", len(parts), def_len)
+        log.debug("len(parts)={}, def_len={}".format(len(parts), def_len))
         if len(parts) > 12 + def_len:
             self.vres, self.vbase , self.vsugar, self.vbackbone = ftuvres.parse_vres(parts[12 + def_len:])
 
@@ -360,8 +360,7 @@ class AngleStat(object):
             # Map the difference to a value between 0 and pi
             raw_diff_on_circle = abs(
                 (raw_diff + math.pi / 2) % (math.pi) - math.pi / 2)
-            log.debug("Angular difference for %s is %f, mapped to %f",
-                      attr, raw_diff, raw_diff_on_circle)
+            log.debug("Angular difference for {} is {}, mapped to {}".format(attr, raw_diff, raw_diff_on_circle))
             ret.append(raw_diff_on_circle)
         return tuple(ret)
 
@@ -382,10 +381,10 @@ class AngleStat(object):
             return False
         for dev in deviation[1:]:
             if dev > angular_cutoff:
-                log.debug("Dissimilar, because of angular deviation %s (%s) > %f",
-                          dev, deviation[1:], angular_cutoff)
+                log.debug("Dissimilar, because of angular deviation {} ({}) > {}".format(
+                    dev, deviation[1:], angular_cutoff))
                 return False
-        log.debug("%s < (%f, %f)", deviation, position_cutoff, angular_cutoff)
+        log.debug("{} < ({}, {})".format(deviation, position_cutoff, angular_cutoff))
         return True
 
 

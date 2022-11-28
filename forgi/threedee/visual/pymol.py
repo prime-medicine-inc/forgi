@@ -296,7 +296,7 @@ class PymolPrinter(object):
                                             text, key=key)
                     vstat_line = cg.infos["vstat_{}".format(key)]
                     if self.plot_virtual_stems and key not in cg.get_mst() and vstat_line:
-                        log.info("Plotting virtual stem for %s", key)
+                        log.info("Plotting virtual stem for {}".format(key))
                         virtual_stat = ftmstat.AngleStat()
                         vstat_line = vstat_line[0]
                         print(vstat_line)
@@ -310,7 +310,8 @@ class PymolPrinter(object):
                         rna_plotter.add_segment(cg.coords[key][fixed_side], vstem_coords0, self.plot_virtual_stems, 0.7*self.cylinder_width,
                                                 "", key="virtual stem {}".format(key))
                     else:
-                        log.info("NOT Plotting virtual stem for %s: %s, %s, %s", key, self.plot_virtual_stems, key not in cg.get_mst(), vstat_line )
+                        log.info("NOT Plotting virtual stem for {}: {}, {}, {}".format(
+                            key, self.plot_virtual_stems, key not in cg.get_mst(), vstat_line))
 
                 elif key[0] in 'ft':
                     try:

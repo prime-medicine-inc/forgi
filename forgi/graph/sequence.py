@@ -29,7 +29,7 @@ class MissingResidue(object):
         :param resname: A string. Probably one of "AUGC".
         """
         if not isinstance(resid, fgr.RESID):
-            log.debug("Type of %s is %s", resid, type(resid).__name__)
+            log.debug("Type of {} is {}".format(resid, type(resid).__name__))
             resid = fgr.resid_from_str(resid)
         self.resid = resid
         self.res_name = res_name
@@ -70,7 +70,7 @@ class _Biggest(object):
 
 
 def to_0_based(key):
-    log.debug("Converting key %s", key)
+    log.debug("Converting key {}".format(key))
     if isinstance(key, slice):
         # Step
         step = key.step
@@ -105,7 +105,7 @@ def to_0_based(key):
             key = key - 1
     else:
         raise TypeError("Invalid index type {}".format(type(key).__name__))
-    log.debug("Returning key %s", key)
+    log.debug("Returning key {}".format(key))
     return key
 
 
@@ -116,7 +116,7 @@ def _insert_breakpoints_simple(seq, breakpoints, start=0, reverse=False):
     :param start: The coordinate "on the forward strand",
                  i.e. the lower number of start and stop.
     """
-    log.debug("Inserting breakpoints %s into %s", seq, breakpoints)
+    log.debug("Inserting breakpoints {} into {}".format(seq, breakpoints))
     breakpoints = sorted(breakpoints)
     if not breakpoints:
         return seq
@@ -125,13 +125,12 @@ def _insert_breakpoints_simple(seq, breakpoints, start=0, reverse=False):
     out = []
     if reverse:
         seq = seq[::-1]
-    log.debug("Inserting breakpoints into %s, start=%s, "
-              "reversed=%s", seq, start, reverse)
+    log.debug("Inserting breakpoints into {}, start={}, reversed={}".format(seq, start, reverse))
     oldbp = 0
     for bp in breakpoints:
-        log.debug("BP=%s", bp)
+        log.debug(f"BP={bp}")
         bp -= start
-        log.debug("bp-=start-->>>%s", bp)
+        log.debug(f"bp-=start-->>>{bp}")
         out.append(seq[oldbp:bp + 1])
         oldbp = bp + 1
     out.append(seq[bp + 1:]) # pylint: disable=undefined-loop-variable
@@ -139,7 +138,7 @@ def _insert_breakpoints_simple(seq, breakpoints, start=0, reverse=False):
     seq = "&".join(out)
     if reverse:
         seq = seq[::-1]
-    log.debug("seq with break points: %s", seq)
+    log.debug(f"seq with break points: {seq}")
     return seq
 
 
@@ -159,7 +158,7 @@ def _sorted_missing_residues(list_of_dicts):
     chain_to_residues = defaultdict(list)
     resid_to_nucleotide = {}
     for res_dict in list_of_dicts:
-        log.debug("Processing %s", res_dict)
+        log.debug("Processing {}".format(res_dict))
         if isinstance(res_dict, MissingResidue):
             resid = res_dict.resid
             chain = res_dict.resid.chain
@@ -172,7 +171,7 @@ def _sorted_missing_residues(list_of_dicts):
             res_name = res_dict["res_name"]
         else:
             if res_dict["model"] not in [None, 1, "A"]:
-                log.info("Invalid missing residue %s", res_dict)
+                log.info("Invalid missing residue {}".format(res_dict))
                 continue
             if res_dict["insertion"] is None:
                 insertion = " "
@@ -184,7 +183,7 @@ def _sorted_missing_residues(list_of_dicts):
         chain_to_residues[chain].append(resid)
         resid_to_nucleotide[resid] = res_name
     for reslist in chain_to_residues.values():
-        log.debug("Sorting %s", reslist)
+        log.debug("Sorting {}".format(reslist))
         reslist.sort(key=_resid_key)
     return chain_to_residues, resid_to_nucleotide
 
@@ -199,15 +198,14 @@ class _IndexHelper(object):
         self.parent = parent
 
     def __getitem__(self, key):
-        log.debug("%s.__getitem__ called. %s=True",
-                  type(self).__name__, self.flag)
+        log.debug("{}.__getitem__ called. {}=True".format(type(self).__name__, self.flag))
         return self.parent._getitem(key, **{self.flag: True})
 
     def _getitem(self, key, include_missing=False, show_modifications=False):
         kwargs = {"include_missing": include_missing,
                   "show_modifications": show_modifications}
         kwargs.update({self.flag: True})
-        log.debug("%s._getitem called. flags: %s", type(self).__name__, kwargs)
+        log.debug("{}._getitem called. flags: {}".format(type(self).__name__, kwargs))
         return self.parent._getitem(key, **kwargs)
 
     def __getattr__(self, attr):
@@ -216,13 +214,13 @@ class _IndexHelper(object):
         the same name as the value of self.flag, then we set this
         attributre to True
         """
-        log.debug("Getattr called for %s", attr)
+        log.debug("Getattr called for {}".format(attr))
         f = getattr(self.parent, attr)
         if callable(f):
             argspec = inspect.getargspec(f)
-            log.debug("For function %s: args are %s", f, argspec.args)
+            log.debug(f"For function {f}: args are {argspec.args}")
             if argspec.keywords or self.flag in argspec.args:
-                log.debug("setting flag %s", self.flag)
+                log.debug(f"setting flag {self.flag}")
                 kwargs = {self.flag: True}
                 f = partial(f, **kwargs)
         return f
@@ -263,8 +261,8 @@ class _WMIndexer(_IndexHelper):
             if d[i+1]>=d[i]:
                 val += sum(1 for _ in self.iter_resids(
                     self.to_resid(d[i]), self.to_resid(d[i + 1])))
-                log.debug("Define length of %s with missing incremented to %s", d, val)
-        log.debug("Define length of %s with missing is finally %s", d, val)
+                log.debug(f"Define length of {d} with missing incremented to {val}")
+        log.debug(f"Define length of {d} with missing is finally {val}")
         return val
 
 
@@ -285,7 +283,7 @@ class SeqidList(SequenceABC):
             c = Counter(self._list)
             for k, amount in c.most_common():
                 if amount > 1:
-                    log.error("Seq_id %s  occurs %s times!", k, amount)
+                    log.error(f"Seq_id {k}  occurs {amount} times!")
                 else:
                     break
             if c.most_common()[0][1] == 1:
@@ -350,8 +348,8 @@ class Sequence(object):
         :param missing_residues: A list of dictionaries with the following keys:
                 "res_name", "chain", "ssseq", "insertion"
         """
-        log.debug("Sequence initialized with %s, %s, %s", seq, list(
-            map(fgr.resid_to_str, seqids)), missing_residues)
+        log.debug("Sequence initialized with {}, {}, {}".format(seq, list(
+            map(fgr.resid_to_str, seqids)), missing_residues))
         # Uses 0-based indexing
         i = 0
         self._breaks_after = []
@@ -362,7 +360,7 @@ class Sequence(object):
                 self._breaks_after.append(i - 1)
             else:
                 i += 1
-        log.debug("Break-points for seq %s are: %s", seq, self._breaks_after)
+        log.debug("Break-points for seq {} are: {}".format(seq, self._breaks_after))
         self._seq = seq.replace('&', '')
         self._seqids = SeqidList(seqids)
         self._missing_residues = defaultdict(list)
@@ -376,7 +374,7 @@ class Sequence(object):
 
     def _set_missing_residues(self, missing_residues):
         mr, mnts = _sorted_missing_residues(missing_residues)
-        log.debug("Setting missing residues to: %s, %s", mr, mnts)
+        log.debug("Setting missing residues to: {}, {}".format(mr, mnts))
         self._missing_residues = mr
         self._missing_nts = mnts  # A dict seq_id:nt
 
@@ -422,8 +420,8 @@ class Sequence(object):
 
     def __eq__(self, other):
         log.debug("{} =?= {}".format(repr(self), repr(other)))
-        log.debug("type of other=%s, type of string literal in this module is %s", type(
-            other).__name__, type("").__name__)
+        log.debug("type of other={}, type of string literal in this module is {}".format(type(
+            other).__name__, type("").__name__))
         if isinstance(other, type(self)):
             if self._seq != other._seq:
                 log.debug("Sequence different!")
@@ -432,29 +430,28 @@ class Sequence(object):
                 log.debug("Breakpoints different!")
                 return False
             if self._seqids != other._seqids:
-                log.debug("seq_ids different: %s != %s",
-                          self._seqids, other._seqids)
+                log.debug("seq_ids different: {} != {}".format(self._seqids, other._seqids))
                 return False
             if self._missing_nts != other._missing_nts:
                 if log.isEnabledFor(logging.DEBUG):
                     for key, val in self._missing_nts.items():
                         if key in other._missing_nts:
                             if self._missing_nts[key] != other._missing_nts[key]:
-                                log.debug("nt changed for %s from %s to %s", key,
-                                          self._missing_nts[key], other._missing_nts[key])
+                                log.debug("nt changed for {} from {} to {}".format(key,
+                                          self._missing_nts[key], other._missing_nts[key]))
                         else:
-                            log.debug("%s missing in other", key)
+                            log.debug("{} missing in other".format(key))
                     for key in other._missing_nts:
                         if key not in self._missing_nts:
-                            log.debug("%s extra in other", key)
+                            log.debug("{} extra in other".format(key))
                 return False
             log.debug("They are equal")
             return True
         return str(self) == other
 
     def _getitem(self, key, include_missing=False, show_modifications=False):
-        log.debug("_getitem called for %s, include_missing=%s, show_modifications=%s",
-                  key, include_missing, show_modifications)
+        log.debug("_getitem called for {}, include_missing={}, show_modifications={}".format(
+                  key, include_missing, show_modifications))
         if isinstance(key, int):
             key = to_0_based(key)
             if show_modifications and self._seqids[key] in self._modifications:
@@ -477,7 +474,7 @@ class Sequence(object):
                 error = IndexError(
                     "Nucleotide {} is not part of this RNA".format(key))
                 with log_to_exception(log, error):
-                    log.error("self._missing_nts = %s", self._missing_nts)
+                    log.error("self._missing_nts = {}".format(self._missing_nts))
                 raise error
             else:
                 if show_modifications and key in self._modifications:
@@ -539,7 +536,7 @@ class Sequence(object):
                 else:
                     stopRES = self._seqids[key.stop]
         key2 = slice(startRES, stopRES, key.step)
-        log.debug("Converted integer_slice %s to resid-slice %s", key, key2)
+        log.debug("Converted integer_slice {} to resid-slice {}".format(key, key2))
         return self._resid_slice(key2, include_missing, show_modifications)
 
     def _resid_slice_to_int_slice(self, key):
@@ -652,9 +649,8 @@ class Sequence(object):
         if left_res is not None:
             yield left_res
             # seq+=self._seq[self._seqids.index(left_res)]
-            #log.debug("Added first residue %s: %s", left_res, seq)
             start_i += 1
-        log.debug("Iterating over sequence %s-%s", start_i, stop_i + 1)
+        log.debug("Iterating over sequence {}-{}".format(start_i, stop_i + 1))
         mr_keys = None
         for i in range(start_i, stop_i + 1):
             try:
@@ -681,26 +677,26 @@ class Sequence(object):
                 old_r = left_res
                 for j, r in enumerate(mr_keys):
                     if not found_start and r == start:
-                        log.debug("Found start for i=%d, %s", i, r)
+                        log.debug("Found start for i={}, {}".format(i, r))
                         found_start = True
                         old_r = None
-                    log.debug("Now processing missing residue %s", r)
+                    log.debug("Now processing missing residue {}".format(r))
                     if found_start:
                         if old_r is not None and old_r.chain != r.chain:
                             yield "&"
                             log.debug("Breakpoint inserted!")
-                        log.debug("Adding missing residue %s", mr[j])
+                        log.debug("Adding missing residue {}".format(mr[j]))
                         yield r
-                    log.debug("Comparing %s and stop=%s", r, stop)
+                    log.debug("Comparing {} and stop={}".format(r, stop))
                     if r == stop:
-                        log.debug("Stop found! Seq=%s", seq)
+                        log.debug("Stop found! Seq={}".format(seq))
                         return
                     old_r = r
             # If key.start and key.stop resp. are not modified residues,
             # start_i and stop_i are already accurrate, making
             # additional checks here unneccessary.
             if found_start and i < len(self._seq):
-                log.debug("Adding regular residue %s", self._seq[i])
+                log.debug("Adding regular residue {}".format(self._seq[i]))
                 if mr_keys:  # No missing residues
                     if r.chain != right_res.chain:
                         yield "&"
@@ -711,7 +707,7 @@ class Sequence(object):
                         log.debug("Breakpoint inserted!")
                 yield right_res
             left_res = right_res
-            log.debug("seq now is %s", seq)
+            log.debug("seq now is {}".format(seq))
         # If start or stop are not part of sequence,
         # make sure they were seen in missing residues
         if not found_start or stop_is_missing:
@@ -720,8 +716,7 @@ class Sequence(object):
         return
 
     def _missing_residues_between(self, from_resid, to_resid):
-        log.debug("Searching missing residues between %s  and %s",
-                  from_resid, to_resid)
+        log.debug("Searching missing residues between {}  and {}".format(from_resid, to_resid))
         if from_resid is not None and to_resid is not None:
             if from_resid.chain != to_resid.chain:
                 left = self._missing_residues_between(from_resid, None)
@@ -794,7 +789,7 @@ class Sequence(object):
         val = 0
         for i in range(0, len(d), 2):
             val += d[i + 1] - d[i] + 1
-        log.debug("Define length of %s without missing is %s", d, val)
+        log.debug("Define length of {} without missing is {}".format(d, val))
 
         return val
 

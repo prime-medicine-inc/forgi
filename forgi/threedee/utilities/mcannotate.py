@@ -65,7 +65,7 @@ def parse_chain_base(chain_base):
             # no chain identifier
             chain = ''
             base = chain_base
-    log.debug("base is %s", base)
+    log.debug("base is {}".format(base))
     return (chain, base)
 
 
@@ -86,7 +86,7 @@ def parse_base_pair_id(base_pair_id):
         e = ValueError(
             "Invalid interaction in the MC-Annotate file: %s" % base_pair_id)
         with log_to_exception(log, e):
-            log.error("Regex matched the following parts: %s", parts)
+            log.error("Regex matched the following parts: {}".format(parts))
         raise e
     if "-".join(parts) != base_pair_id:
         raise ValueError(
@@ -193,7 +193,7 @@ def get_dotplot(lines):
                     else:
                         existing = "{} - {}".format(res2, residues[bps[res2]])
                     log.warning(
-                        "Base-triple encountered: Ignoring basepair %s - %s, because basepair %s exists", res1, res2, existing)
+                        "Base-triple encountered: Ignoring basepair {} - {}, because basepair {} exists".format(res1, res2, existing))
                 continue
 
             paired.add(res1)
@@ -204,7 +204,7 @@ def get_dotplot(lines):
             except ValueError as e:
                 with log_to_exception(log, e):
                     log.error(
-                        "bps = %s, residues = %s, res1 = %s, res2 = %s", bps, residues, res1, res2)
+                        "bps = {}, residues = {}, res1 = {}, res2 = {}".format(bps, residues, res1, res2))
                 raise
 
     for i in range(len(residue_types)):
@@ -224,5 +224,5 @@ def _seqids_from_residue_map(residue_map):
         log.debug("Residue %r", r)
         (from_chain, from_base) = r
         seq_ids += [fgr.RESID(from_chain, parse_resid(from_base))]
-    log.debug("Seq_ids are %s", seq_ids)
+    log.debug("Seq_ids are {}".format(seq_ids))
     return seq_ids

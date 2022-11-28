@@ -175,7 +175,7 @@ class TestStats(unittest.TestCase):
 
 class StatComparisonMixin:
     def assert_stats_equal(self, stat1, stat2):
-        log.info("Asserting equality of %s and %s", stat1, stat2)
+        log.info("Asserting equality of {} and {}".format(stat1, stat2))
         nptest.assert_allclose(stat1.position_params()[
                                0], stat2.position_params()[0], atol=10**-12)
         # In polar coordinates, if the length is 0, the angles do not matter.

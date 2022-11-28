@@ -130,7 +130,7 @@ def cgs_from_args(args, rna_type="any", enable_logging=True,
     cg_rnas = []
     filenames = []
     for rna in args.rna:
-        log.debug("Load RNA %s", rna)
+        log.debug("Load RNA {}".format(rna))
         if rna_type == "only_cg":
             args.chains = None
             args.pseudoknots = None
@@ -150,10 +150,10 @@ def cgs_from_args(args, rna_type="any", enable_logging=True,
                                  pdb_allow_www_query=args.pdb_allow_www_query)
         except GraphConstructionError:
             if not skip_errors:
-                log.error("An error occurred while loading the file %s", rna)
+                log.error("An error occurred while loading the file {}".format(rna))
                 raise
             else:
-                log.exception("The PDB %s was skipped due to the following error", rna)
+                log.exception("The PDB {} was skipped due to the following error".format(rna))
         else:
             cg_rnas.extend(cg_or_cgs)
             filenames.extend([rna] * len(cg_or_cgs))
@@ -239,7 +239,7 @@ def load_rna(filename, rna_type="any", allow_many=True, pdb_chain=None,
                           "Trying to treat it as a filename instead...".format(filename))
         else:
             log.info(
-                "Assuming RNA %s is a dotbracketstring and not a file.", filename)
+                "Assuming RNA {} is a dotbracketstring and not a file.".format(filename))
             bg = fgb.BulgeGraph.from_dotbracket(
                 filename, dissolve_length_one_stems=dissolve_length_one_stems)
             if allow_many:
@@ -416,7 +416,7 @@ def with_missing_refolded(cg):
     stru, energy = fc.mfe()
 
     stru=insert_pk_into_stru(stru, fasta_lines[2])
-    log.info("Energy of constraint secondary structyure is %s", energy)
+    log.info("Energy of constraint secondary structyure is {}".format(energy))
     new_fasta="\n".join([fasta_lines[0], fasta_lines[1], stru])
     new_cg, = ftmc.CoarseGrainRNA.from_fasta_text(new_fasta)
     new_cg._seq = fgs.missing_to_normal(cg.seq)

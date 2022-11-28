@@ -57,7 +57,7 @@ class NumberedDotbracket():
             for line in tb:
                 log.debug(line.strip())
             log.debug("NumberedDotbracket initialized. "
-                  "residue_numbers[0]=%s", residue_numbers[0])
+                  "residue_numbers[0]={}".format(residue_numbers[0]))
 
     def without_unpaired(self):
         """
@@ -67,8 +67,7 @@ class NumberedDotbracket():
         :param residue_numbers: A list of residue numbers,
                                 with same length as dotbracket
         """
-        log.debug("Removing unpaired from %s",
-                  list(map(fgr.resid_to_str, self.residue_numbers)))
+        log.debug("Removing unpaired from {}".format(list(map(fgr.resid_to_str, self.residue_numbers))))
         new_dotbracket = ""
         new_residue_numbers = []
         new_helix_ends = []
@@ -78,8 +77,7 @@ class NumberedDotbracket():
                 new_dotbracket+=ch
                 new_residue_numbers.append(self.residue_numbers[i])
                 new_helix_ends.append(self.helix_ends[i])
-        log.debug("Residue numbers now %s",
-                  list(map(fgr.resid_to_str, new_residue_numbers)))
+        log.debug("Residue numbers now {}".format(list(map(fgr.resid_to_str, new_residue_numbers))))
         return NumberedDotbracket(new_dotbracket, new_residue_numbers, new_helix_ends)
 
 
@@ -89,9 +87,9 @@ class NumberedDotbracket():
         except AttributeError: #residue numbers are ints or something else
             breakpoints=[]
         dotbracketstr = fgs._insert_breakpoints_simple(self.dotbracket_str, breakpoints, 1)
-        log.info("Converting %s to forgi", dotbracketstr)
+        log.info("Converting {} to forgi".format(dotbracketstr))
         bg = fgb.BulgeGraph.from_dotbracket(dotbracketstr)
-        log.debug("Forgi-db is %s ", bg.to_dotbracket_string())
+        log.debug("Forgi-db is {} ".format(bg.to_dotbracket_string()))
 
         return bg
 
@@ -107,11 +105,11 @@ class NumberedDotbracket():
             if bg.stem_length(stem)<min_length:
                 to_unpaired.extend(bg.define_residue_num_iterator(stem))
         numpy_db = np.array(list(self.dotbracket_str))
-        log.info("%s %s", "".join(numpy_db), type(numpy_db))
+        log.info("{} {}".format("".join(numpy_db), type(numpy_db)))
         to_unpaired = np.array(to_unpaired, dtype = int)
         to_unpaired-=1 #0-based indexing, numpy supports element-wise substraction
         numpy_db[to_unpaired]="."
-        log.info("After to_unpaired %s ", "".join(numpy_db))
+        log.info("After to_unpaired " + "".join(numpy_db))
         return NumberedDotbracket("".join(numpy_db), self.residue_numbers, self.helix_ends)
 
     def condensed(self, remove_helices_shorter_than=3):
@@ -122,19 +120,17 @@ class NumberedDotbracket():
         :param residue_numbers: A list of residue numbers,
                                 with same length as dotbracket
         """
-        log.debug("Condensing: Seq-ids are %s of length %s",
-                  list(map(fgr.resid_to_str, self.residue_numbers)),
-                  len(self.residue_numbers))
+        log.debug("Condensing: Seq-ids are {} of length {}".format(
+            list(map(fgr.resid_to_str, self.residue_numbers)), len(self.residue_numbers)))
         bg = self._to_forgi()
-        log.debug("Breakpoints are (0-based) %s", bg.seq._breaks_after)
-        log.debug("Before setting: ResNum: %s will be set to %s",
-                  bg.seq._seqids, self.residue_numbers)
+        log.debug("Breakpoints are (0-based) {}".format(bg.seq._breaks_after))
+        log.debug("Before setting: ResNum: {} will be set to {}".format(bg.seq._seqids, self.residue_numbers))
         bg.seq._seqids = self.residue_numbers
-        log.debug("After setting, before condensing: ResNum: %s", bg.seq._seqids[0])
+        log.debug("After setting, before condensing: ResNum: {}".format(bg.seq._seqids[0]))
         bg2 = bg.transformed.condensed()
         log.debug("Successfully transformed")
-        log.debug("DB now %s", bg2.to_dotbracket_string())
-        log.debug("Resids now %s", bg2.seq._seqids)
+        log.debug("DB now {}".format(bg2.to_dotbracket_string()))
+        log.debug("Resids now {}".format(bg2.seq._seqids))
 
         helix_ends = []
         for seqid in  bg2.seq._seqids:
@@ -147,7 +143,7 @@ class NumberedDotbracket():
                 assert False
             helix_ends.append(helix_end)
 
-        log.debug("Helix ends: %s", helix_ends)
+        log.debug("Helix ends: {}".format(helix_ends))
         return NumberedDotbracket(bg2.to_dotbracket_string(), bg2.seq._seqids, helix_ends)
 
     def __str__(self):

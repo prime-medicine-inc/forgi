@@ -38,8 +38,7 @@ def split_at_cofold_cutpoints(bg, cutpoints):
                 e = GraphConstructionError("Cannot create BulgeGraph. Found two sequences not "
                                            "connected by any base-pair.")
                 with log_to_exception(log, e):
-                    log.error("Trying to split between %s and %s",
-                              element_left, element_right)
+                    log.error(f"Trying to split between {element_left} and {element_right}")
                 raise e
             return
         elif element_left[0] == "i" or element_right[0] == "i":
@@ -69,14 +68,13 @@ def _is_connected(bg):
             continue
         pending.extend(bg.edges[next_node])
         known_nodes.add(next_node)
-    log.info("Testing connectivity: connected component =?= all nodes:\n%s =?= %s",
-             list(sorted(known_nodes)), list(sorted(set(bg.defines.keys()))))
+    log.info(f"Testing connectivity: connected component =?= "
+             f"all nodes:\n{list(sorted(known_nodes))} =?= {list(sorted(set(bg.defines.keys())))}")
     return known_nodes == set(bg.defines.keys())
 
 
 def _split_between_elements(bg, splitpoint, element_left, element_right):
-    log.debug("Before splitting between %s and %s at %s: %s", element_left,
-              element_right, splitpoint, bg.defines)
+    log.debug(f"Before splitting between {element_left} and {element_right} at {splitpoint}: {bg.defines}")
     if element_left[0] in "mh":
         next3 = _next_available_element_name(bg, "t")
         relabel_node(bg, element_left, next3)
@@ -137,7 +135,7 @@ def _split_inside_loop(bg, splitpoint, element):
 
 def _split_inside_stem(bg, splitpoint, element):
     assert element[0] == "s"
-    log.debug("Split inside stem %s at %s", element, splitpoint)
+    log.debug(f"Split inside stem {element} at {splitpoint}")
     if splitpoint == bg.defines[element][1]:
         # Nothing needs to be done. 2 strands split at end
         log.debug("Nothing to do")
@@ -160,8 +158,7 @@ def _split_inside_stem(bg, splitpoint, element):
     edges2 = []
 
     for edge in bg.edges[element]:
-        log.debug("Checking edge %s with define %s connected to %s",
-                  edge, bg.defines[edge], bg.edges[edge])
+        log.debug(f"Checking edge {edge} with define {bg.defines[edge]} connected to {bg.edges[edge]}")
         flank = bg.flanking_nucleotides(edge)
         found = 0
         if define1[0] in flank or define1[3] in flank:
@@ -171,11 +168,9 @@ def _split_inside_stem(bg, splitpoint, element):
             edges2.append(edge)
             found += 1
         if found != 1:
-            log.error("For stem %s with define %s and cutpoint %s:",
-                      element, bg.defines[element], splitpoint)
-            log.error("Edge %s, with flanking nts %s, define1 %s, "
-                      "define2 %s", edge, bg.flanking_nucleotides(edge),
-                      define1, define2)
+            log.error(f"For stem {element} with define {bg.defines[element]} and cutpoint {splitpoint}:")
+            log.error(f"Edge {edge}, with flanking nts {bg.flanking_nucleotides(edge)}, "
+                      f"define1 {define1}, define2 {define2}")
             assert False
     remove_vertex(bg, element)
     next_s1 = _next_available_element_name(bg, "s")

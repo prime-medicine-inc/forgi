@@ -86,7 +86,7 @@ def mock_run_mc_annotate(original_function):
             lines = original_function(filename, subprocess_kwargs)
             with open(os.path.join("test", "forgi", "threedee", "data", new_fn), "w") as f:
                 print("\n".join(lines), file=f)
-        log.info("Returning lines: %s", lines)
+        log.info("Returning lines: {}".format(lines))
         return lines
     return mocked_run_mc_annotate
 
@@ -262,8 +262,7 @@ class CoarseGrainIoTest(tfgb.GraphVerification):
         self.check_cg_integrity(cg)
 
     def verify_multiple_chains(self, cg, single_chain_cgs):
-        log.warning("Backbone in %s breaks after %s",
-                    cg.name, cg.backbone_breaks_after)
+        log.warning("Backbone in {} breaks after {}".format(cg.name, cg.backbone_breaks_after))
         self.assertEqual(len(cg.backbone_breaks_after),
                          len(single_chain_cgs) - 1)
 
@@ -304,8 +303,7 @@ class CoarseGrainIoTest(tfgb.GraphVerification):
             'test/forgi/threedee/data/3CQS.pdb', load_chains='C')
         cg, = ftmc.CoarseGrainRNA.from_pdb(
             'test/forgi/threedee/data/3CQS.pdb',  load_chains=None)
-        log.warning("cg now has %s cutpoints: %s", len(
-            cg.seq._breaks_after), cg.backbone_breaks_after)
+        log.warning("cg now has {} cutpoints: {}".format(len(cg.seq._breaks_after), cg.backbone_breaks_after))
         self.verify_multiple_chains(cg, [cgA, cgB, cgC])
 
     def test_multiple_chain_to_cg(self):
@@ -812,7 +810,7 @@ class RotationTranslationTest(unittest.TestCase):
         log.warning("==================================")
         for i, coord in enumerate(a):
             if any(abs(coord-c2[i])>10**-4):
-                log.warning("%s %s %s %s",coord, b[i], c2[i], d[i])
+                log.warning("{} {} {} {}".format(coord, b[i], c2[i], d[i]))
 
         self.assertLess(ftme.cg_rmsd(self.cg2, cg2_rot), 10**-6)
 

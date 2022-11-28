@@ -39,8 +39,8 @@ def read_config():
             with open(filename) as f:
                 conf = json.load(f)
         except (OSError, IOError):
-            log.debug("No configuration file present at %s", filename)
+            log.debug("No configuration file present at {}".format(filename))
         else:
-            log.debug("Reading configuration from %s", filename)
+            log.debug("Reading configuration from {}".format(filename))
             config.update(conf)
     return config

@@ -86,7 +86,8 @@ class DSSRAnnotation(object):
             nt2, nt3 = map(dssr_to_pdb_resid, nt23.split(","))
             nt1 = dssr_to_pdb_resid(nt1)
             if nt1 not in self._cg.seq or nt2 not in self._cg.seq or nt3 not in self._cg.seq:
-                log.debug("Ignoring A-Minor interaction outside this connected component: %s->%s-%s", nt1, nt2, nt3)
+                log.debug("Ignoring A-Minor interaction outside this connected component: {}->{}-{}".format(
+                    nt1, nt2, nt3))
                 continue
             stem = self._cg.get_elem(nt2)
             if stem!=self._cg.get_elem(nt3):
@@ -121,7 +122,7 @@ class DSSRAnnotation(object):
             try:
                 s1 = self._cg.seq.with_missing[nt1]
                 s2 = self._cg.seq.with_missing[nt2]
-                log.debug("Basepair is %s -%s- %s", s1, bp_type, s2)
+                log.debug("Basepair is {} -{}- {}".format(s1, bp_type, s2))
             except IndexError:
                 continue
             if elem is None:
@@ -130,8 +131,8 @@ class DSSRAnnotation(object):
                     if nt1 == partner:
                         continue
                     elif self._cg.get_node_from_residue_num(nt1)[0] == "s" and self._cg.get_node_from_residue_num(nt2)[0] == "s":
-                        log.warning("Pairing partner of %s is %s, but "
-                                    "DSSR has %s in interaction. Base-triple?", nt2, partner, nt1)
+                        log.warning(f"Pairing partner of {nt2} is {partner}, but "
+                                    f"DSSR has {nt1} in interaction. Base-triple?")
                 yield nt1, nt2, bp_type
             else:
                 try:
@@ -181,9 +182,9 @@ class DSSRAnnotation(object):
             except RuntimeError:
                 continue
             else:
-                log.debug("Coaxial stack %s mapped to forgi %s", dssr_stack, cg_stack)
+                log.debug("Coaxial stack {} mapped to forgi {}".format(dssr_stack, cg_stack))
                 cg_stacks.append(cg_stack)
-        log.debug("coaxial stacks are %s", cg_stacks)
+        log.debug("coaxial stacks are {}".format(cg_stacks))
         return cg_stacks
 
     def cg_stem(self, dssr_stem):
@@ -192,7 +193,7 @@ class DSSRAnnotation(object):
 
         :param dssr_stem: INT the stem in the DSSR Anntotation.
         """
-        log.debug("Mapping DSSR stem %s to forgi", dssr_stem)
+        log.debug("Mapping DSSR stem {} to forgi".format(dssr_stem))
         if "stems" not in self._dssr:
             raise DSSRLookupError("The DSSR object does not contain any stem!")
         for stem_obj in self._dssr["stems"]:
@@ -200,7 +201,7 @@ class DSSRAnnotation(object):
                 break
         else:
             raise DSSRLookupError("No stem with index {}".format(dssr_stem))
-        log.debug("Found stem %s&%s", stem_obj["strand1"], stem_obj["strand2"])
+        log.debug("Found stem {}&{}".format(stem_obj["strand1"], stem_obj["strand2"]))
 
         cg_stems = Counter()  # See, if the dssr_stems maps to more than 1 cg-stem
         for pair in stem_obj["pairs"]:
@@ -208,7 +209,7 @@ class DSSRAnnotation(object):
             res2 = dssr_to_pdb_resid(pair["nt2"])
             if res1 is None or res2 is None:
                 continue
-            log.debug("Contains pair %s-%s", res1, res2)
+            log.debug("Contains pair {}-{}".format(res1, res2))
             if self._cg.chains and (res1.chain not in self._cg.chains or res2.chain not in self._cg.chains):
                 e = WrongChain()
                 with log_to_exception(log, e):
@@ -321,7 +322,7 @@ class DSSRAnnotation(object):
                         continue
                     nts_dssrstack.append(nt)
                 if any(nt in nts_dssrstack for nt in helix1) and any(nt in nts_dssrstack for nt in helix2):
-                    log.debug("elem %s is stacking ", loop)
+                    log.debug("elem {} is stacking ".format(loop))
                     stacking.append(loop)
                     break
         log.debug(stacking)

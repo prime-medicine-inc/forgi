@@ -199,15 +199,15 @@ def cg_rmsd(cg1, cg2):
             residues1.append(cg1.get_virtual_residue(res, allow_single_stranded = True))
             residues2.append(cg2.get_virtual_residue(res, allow_single_stranded = True))
         if len(residues1)>len(res_ids)*0.8:
-            log.warning("Using only %s common residues for RMSD comparison based on seq_ids.", len(residues1))
+            log.warning("Using only {} common residues for RMSD comparison based on seq_ids.".format(len(residues1)))
             if set(cg1.seq._seqids)-common_resids :
-                log.warning("Ignoring from cg1:  %s.", set(cg1.seq._seqids)-common_resids )
+                log.warning("Ignoring from cg1:  {}.".format(set(cg1.seq._seqids)-common_resids ))
             if set(cg2.seq._seqids)-common_resids:
-                log.warning("Ignoring from cg2:  %s.", set(cg2.seq._seqids)-common_resids )
+                log.warning("Ignoring from cg2:  {}.".format(set(cg2.seq._seqids)-common_resids ))
             return rmsd(residues1, residues2)
         else:
             log.warning("Cannot compare based on seqids: Intersection of"
-                        " resids is too small: %s", common_resids)
+                        " resids is too small: {}".format(common_resids))
         raise Incompareable("Cgs {} and {} cannot be compared according to the RMSD, "
                             "because they do not have the same number of "
                             "virtual residues.".format(cg1.name, cg2.name))

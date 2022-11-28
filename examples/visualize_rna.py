@@ -122,7 +122,7 @@ def pymol_printer_from_args(args):
         elem_colors = {}
         for directive in directives:
             elem, _, color = directive.partition(":")
-            log.debug("Element %s: %s", elem, color)
+            log.debug("Element {}: {}".format(elem, color))
             if not color:
                 color = "purple"
             if color not in ftvp.NAMED_COLORS:  # A hex value
@@ -138,7 +138,7 @@ def pymol_printer_from_args(args):
                 elem_colors = defaultdict(lambda: default_color, elem_colors)
             else:
                 elem_colors[elem] = color
-            log.debug("Element %s", elem_colors)
+            log.debug("Element {}".format(elem_colors))
 
         pp.element_specific_colors = elem_colors
     return pp
@@ -265,8 +265,8 @@ def main(args):
                          stdout=sp.PIPE, stderr=sp.PIPE)
         log.info("Now opening pymol")
         out, err = p.communicate()
-        log.info("Out=\n%s", out)
-        log.info("Errt=\n%s", err)
+        log.info("Out=\n{}".format(out))
+        log.info("Errt=\n{}".format(err))
 
 parser = get_parser()
 if __name__ == "__main__":

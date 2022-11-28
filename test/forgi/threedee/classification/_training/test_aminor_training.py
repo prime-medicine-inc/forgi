@@ -106,7 +106,7 @@ class TestFr3dParsing(unittest.TestCase):
             line = line.strip()
             if line.startswith("#") or not line:
                 continue
-            log.info("Testing line %s", line)
+            log.info("Testing line {}".format(line))
             with ignore_warnings():
                 self.assertEqual(ftcta._parse_fred_line(
                     line, cgs, "?", "test/forgi/threedee/data/chain_id_mappings"), None)

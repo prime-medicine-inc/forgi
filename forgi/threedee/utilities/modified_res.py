@@ -125,7 +125,7 @@ def to_4_letter_alphabeth(chain, query_db=False):
                 if not res_info:
                     # Unknown code. Remove residue
                     log.info(
-                        "Detaching %s, because we do not understand the code %s.", r, r.resname)
+                        "Detaching {}, because we do not understand the code {}.".format(r, r.resname))
                     chain.detach_child(r.id)
                     continue  # Continue with same i (now different residue)
                 if res_info["Polymer type"] != "Ribonucleotide":
@@ -135,12 +135,12 @@ def to_4_letter_alphabeth(chain, query_db=False):
                 if res_info["Type description"] == "NON-POLYMER":
                     # e.g. GTP in 3DIR
                     log.warning(
-                        "Detaching %s, because %s is classified as non-polymeric.", r, r.resname)
+                        "Detaching {}, because {} is classified as non-polymeric.".format(r, r.resname))
                     chain.detach_child(r.id)
                     continue  # Continue with same i (now different residue)
                 if res_info["Standard parent"] not in ["A", "U", "G", "C"]:
-                    log.warning("Detaching %s, because %s has standard parent '%s'.",
-                                r, r.resname, res_info["Standard parent"])
+                    log.warning("Detaching {}, because {} has standard parent '{}'.".format(
+                                r, r.resname, res_info["Standard parent"]))
                     chain.detach_child(r.id)
                     continue  # Continue with same i (now different residue)
 
@@ -150,7 +150,7 @@ def to_4_letter_alphabeth(chain, query_db=False):
 
         # rename modified residues
         if r.id[0].strip():
-            log.debug("Modified residue: %s", r.id)
+            log.debug("Modified residue: {}".format(r.id))
             # The following was added because of 1NYI.pdb. It includes a single G-residue denoted as HETATOM in chain A.
             # It forms a base-pair, but is probably not connected to the backbone.
             # Instead of removing it/ in addition to removing it,
@@ -159,7 +159,7 @@ def to_4_letter_alphabeth(chain, query_db=False):
             # A plain AUGC as a HETATOM means it is a ligand.
             # 1Y26 has H_ADE instead of H_A
             if r.id[0].strip() in ["H_A", "H_U", "H_G", "H_C", "H_  G", "H_  C", "H_  A", "H_  U", "H_ADE", "H_CYT", "H_GUA", "H_URI"]:
-                log.debug("Detaching %s, because it is a ligand", r.id)
+                log.debug("Detaching {}, because it is a ligand".format(r.id))
                 chain.detach_child(r.id)
                 continue  # Continue with same i (now different residue)
 
@@ -188,9 +188,9 @@ class ModifiedResidueLookup(object):
                 return None
             try:
                 self._dict[key] = query_PDBeChem(key)
-                log.debug("Successfully looked up %s", key)
+                log.debug("Successfully looked up {}".format(key))
             except:
-                log.warning("Could not look-up modified residue key %s", key)
+                log.warning("Could not look-up modified residue key {}".format(key))
                 self._dict[key] = None
         return self._dict[key]
 
@@ -209,7 +209,7 @@ def dict_from_pdbs(filenames):
     out_dict = {}
     for filename in filenames:
         with open(filename) as f:
-            log.info("Opened file %s", filename)
+            log.info("Opened file {}".format(filename))
             for line in f:
                 if line.startswith("SEQRES"):
                     codes = line[20:].split()
@@ -221,7 +221,7 @@ def dict_from_pdbs(filenames):
                                 out_dict[code] = res_info
                             except (ValueError, LookupError) as e:
                                 log.warning(
-                                    "3-letter code '%s' not found: %s", code, e)
+                                    "3-letter code '{}' not found: {}".format(code, e))
                                 out_dict[code] = None
     return {k: v for k, v in out_dict.items()}
 

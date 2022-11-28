@@ -220,7 +220,7 @@ def classify_pseudoknot_genus1(pseudoknot):
     elif pseudoknot == "([{)(]})":
         return "g1_M"
     else:
-        log.debug("Other pseudoknot: %s", str(pseudoknot))
+        log.debug("Other pseudoknot: {}".format(str(pseudoknot)))
         return "other"
 
 def update_pk_classes(classes1, classes2):
@@ -251,14 +251,14 @@ def classify_pseudoknots(pseudoknots):
     }
     other = []
     for pseudoknot in pseudoknots:
-        log.debug("Classifying %s for genus 1", pseudoknot)
+        log.debug("Classifying {} for genus 1".format(pseudoknot))
         pk_type = classify_pseudoknot_genus1(pseudoknot)
         #if the pseudoknot is no other - append it
         if pk_type != "other":
             pk_classes[pk_type].append(pseudoknot)
         #if the pseudoknot is "other" clean it again
         else:
-            log.debug("Other %s", pseudoknot)
+            log.debug("Other {}".format(pseudoknot))
             _,_,_,cleaned_pks = identification_pseudoknot(pseudoknot,0,0,0,0)
             #if cleand version is different classify again
             if cleaned_pks != [pseudoknot]:
@@ -279,7 +279,7 @@ def classify_pseudoknot_genus2(pseudoknot):
 
     :param pseudoknot: Current genus1-"other" pseudoknot
     """
-    log.debug("Classifying %s for genus 2", pseudoknot)
+    log.debug("Classifying {} for genus 2".format(pseudoknot))
     pk_classes = {
         "g2_H_type":[],
         "g2_Kissinghairpin":[],
@@ -355,14 +355,14 @@ def extend_pk_description(dataset, filename, pk_type, rna, pk, pk_number):
     """
     domains = rna.get_domains()
     helices = domains["rods"] # A list of elements, e.g. ["s0", "i0", "s1"]
-    log.debug("Helices: %s", helices)
+    log.debug("Helices: {}".format(helices))
     #rna.log(logging.WARNING)
     stems_5p = []
     stems_3p = []
 
     nums = []
-    log.debug("pk Residue numbers %s", pk.residue_numbers)
-    log.debug("pk helix ends %s", pk.helix_ends)
+    log.debug("pk Residue numbers {}".format(pk.residue_numbers))
+    log.debug("pk helix ends {}".format(pk.helix_ends))
 
     for i, resnum in enumerate(pk.residue_numbers):
         num = rna.seq.to_integer(resnum)
@@ -371,10 +371,10 @@ def extend_pk_description(dataset, filename, pk_type, rna, pk, pk_number):
         stems_5p.append(element_5p)
 
         num2 = rna.seq.to_integer(pk.helix_ends[i])
-        log.debug("num %s nums2 %s", num, num2)
+        log.debug("num {} nums2 {}".format(num, num2))
         element_3p =rna.get_node_from_residue_num(num2)
         stems_3p.append(element_3p)
-    log.debug("nums %s", nums)
+    log.debug("nums {}".format(nums))
     for i, stem1_5p in enumerate(stems_5p):
         dataset["Filename"].append(filename)
         dataset["rnaname"] = rna.name
@@ -411,7 +411,7 @@ def extend_pk_description(dataset, filename, pk_type, rna, pk, pk_number):
                 stem2 = stems_3p[0]
             else:
                 stem2 = stems_3p[i+1]
-        log.debug("Stem 5' %s, 3' %s, stem1 %s stem2 %s", stems_5p, stems_3p, stem1, stem2)
+        log.debug("Stem 5' {}, 3' {}, stem1 {} stem2 {}".format(stems_5p, stems_3p, stem1, stem2))
         # enable stacking analysis via DSSR
         # differentiate between stacking (True), no stacking (False) and brakes
         # within/aorund the pseudoknot (-1) incl. 'virtual' angles e.g. H-Type angle_type3
@@ -427,13 +427,13 @@ def extend_pk_description(dataset, filename, pk_type, rna, pk, pk_number):
             connection = []
             stacking = None
             branch = None
-            log.debug("Checking %s and %s for stacking, strand %s", stem1, stem2, strand)
+            log.debug("Checking {} and {} for stacking, strand {}".format(stem1, stem2, strand))
             for elem in rna.iter_elements_along_backbone(): #walk along the backbone
                 if start_found == strand+1:
                     if branch:
-                        log.debug("in branch: elem %s, branch %s, stacking %s", elem, branch, stacking)
+                        log.debug("in branch: elem {}, branch {}, stacking {}".format(elem, branch, stacking))
                         if elem == branch:
-                            log.debug("End branch at %s", elem)
+                            log.debug("End branch at {}".format(elem))
                             branch = None
                             log.debug("Branch end")
                         continue
@@ -446,22 +446,22 @@ def extend_pk_description(dataset, filename, pk_type, rna, pk, pk_number):
                     elif elem == stem2:
                         if stacking is None:
                             stacking = True
-                        log.debug("Found second stem, elem %s, stacking %s", elem, stacking)
+                        log.debug("Found second stem, elem {}, stacking {}".format(elem, stacking))
                         break
                     elif elem[0] == "s" and connection:
                         branch = elem
                         if rna.defines[elem][-1] in rna.backbone_breaks_after:
                             stacking = -1
-                    log.debug("elem %s, stacking %s, branch %s", elem, stacking, branch)
+                    log.debug("elem {}, stacking {}, branch {}".format(elem, stacking, branch))
                 elif elem == stem1:
                     start_found += 1
                     if rna.defines[elem][strand*2+1] in rna.backbone_breaks_after:
                         stacking = -1
-                    log.debug("First stem, elem %s, stacking %s", elem, stacking)
+                    log.debug("First stem, elem {}, stacking {}".format(elem, stacking))
             else:
                 log.debug("End iteration, stacking->-1")
                 stacking = -1
-            log.debug("Finally, stacking = %s", stacking)
+            log.debug("Finally, stacking = {}".format(stacking))
             # more detailed stacking (including backbone brackes within and around the pseudoknot)
             dataset["this_loop_stacking_dssr"].append(stacking)
             dataset["connecting_loops"].append(",".join(connection))
@@ -472,7 +472,7 @@ def extend_pk_description(dataset, filename, pk_type, rna, pk, pk_number):
                 if loop in stacking_loops:
                     ml_stack.append(loop)
             stacks = rna.dssr.coaxial_stacks()
-            log.info("Stacks: %s", stacks)
+            log.info("Stacks: {}".format(stacks))
             for stack in stacks:
                 if stem1 in stack and stem2 in stack:
                     # the two stems stack, but we do not specify along which
@@ -492,20 +492,20 @@ def extend_pk_description(dataset, filename, pk_type, rna, pk, pk_number):
                 for nt in rna.define_residue_num_iterator(elem,seq_ids=True):
                     if (nt, stem1) in aminors:
                         aminors1+=1
-                        log.debug("AMinor %s (%s), %s", nt, elem, stem1)
+                        log.debug("AMinor {} ({}), {}".format(nt, elem, stem1))
                     elif (nt, stem2) in aminors:
                         aminors2+=1
-                        log.debug("AMinor %s (%s), %s", nt, elem, stem2)
+                        log.debug("AMinor {} ({}), {}".format(nt, elem, stem2))
                     else:
                         for partner, typ in nc_dict[nt]:
                             if rna.get_elem(partner)==stem1:
-                                log.debug("base_triple %s, %s: %s-%s (%s)", elem, stem1, nt,partner,typ)
+                                log.debug("base_triple {}, {}: {}-{} ({})".format(elem, stem1, nt,partner,typ))
                                 stem1_triples+=1
                             elif rna.get_elem(partner)==stem2:
-                                log.debug("base_triple %s, %s: %s-%s (%s)", elem, stem2, nt,partner,typ)
+                                log.debug("base_triple {}, {}: {}-{} ({})".format(elem, stem2, nt,partner,typ))
                                 stem2_triples+=1
-            log.debug("%s has a length of %s and %s triples", stem1, rna.stem_length(stem1),stem1_triples)
-            log.debug("%s has a length of %s and %s triples", stem2, rna.stem_length(stem2),stem2_triples)
+            log.debug("{} has a length of {} and {} triples".format(stem1, rna.stem_length(stem1),stem1_triples))
+            log.debug("{} has a length of {} and {} triples".format(stem2, rna.stem_length(stem2),stem2_triples))
             dataset["stem1_basetripleperc_dssr"].append(stem1_triples/rna.stem_length(stem1))
             dataset["stem2_basetripleperc_dssr"].append(stem2_triples/rna.stem_length(stem2))
             dataset["stem1_aminorperc_dssr"].append(aminors1/rna.stem_length(stem1))
@@ -614,11 +614,11 @@ def main():
                 extend_pk_description(pseudoknot_dataset_extended, filename,
                                       "other", rna, pk, pk_id)
         except GraphIntegrityError:
-            log.exception("Ignoring RNA %s; GraphIntegrityError", rna.name)
+            log.exception("Ignoring RNA {}; GraphIntegrityError".format(rna.name))
         except GraphConstructionError:
-            log.exception("Ignoring RNA %s; GraphConstructionError", rna.name)
+            log.exception("Ignoring RNA {}; GraphConstructionError".format(rna.name))
         except Exception:
-            log.error("Error processing %s", rna.name)
+            log.error("Error processing {}".format(rna.name))
             raise
     df1 = pandas.DataFrame(pseudoknot_dataset)
     df1.to_csv("pseudoknot_identification_genus2.csv", mode=args.outfile_mode, header=args.outfile_mode!="a", sep="\t")

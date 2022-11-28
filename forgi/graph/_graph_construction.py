@@ -89,7 +89,7 @@ class _BulgeGraphConstruction(BaseGraph):
             new_bulge = ((last_paired - 1, prev_from - 1))
             bulges += [new_bulge]
 
-        log.debug("from_tuples: stems %s, bulges %s", stems, bulges)
+        log.debug(f"from_tuples: stems {stems}, bulges {bulges}")
         self.from_stems_and_bulges(stems, bulges)
 
     def from_stems_and_bulges(self, stems, bulges):
@@ -110,9 +110,8 @@ class _BulgeGraphConstruction(BaseGraph):
             ss2 = stems[i][0][1] + 1
             se1 = stems[i][1][0] + 1
             se2 = stems[i][1][1] + 1
-            log.debug("stem define not sorted: %s %s %s %s",
-                      ss1, ss2, se1, se2)
-            log.debug("self.defines %s", self.defines)
+            log.debug(f"stem define not sorted:{ss1}, {ss2}, {se1}, {se2}")
+            log.debug(f"self.defines {self.defines}")
 
             self.defines['y%d' % (i)] = [min(ss1, se1), max(ss1, se1),
                                          min(ss2, se2), max(ss2, se2)]
@@ -123,22 +122,17 @@ class _BulgeGraphConstruction(BaseGraph):
             self.defines['b%d' % (i)] = sorted([bulge[0] + 1, bulge[1] + 1])
             self.weights['b%d' % (i)] = 1
 
-        log.debug("from_stems_and_bulges: %s; %s", self.defines, self.edges)
+        log.debug(f"from_stems_and_bulges: {self.defines}; {self.edges}")
         self.create_bulge_graph(stems, bulges)
-        log.debug("after create_bulge_graph: DEFINES:\n %s;\n EDGES:\n %s", pformat(
-            self.defines), pformat(self.edges))
+        log.debug(f"after create_bulge_graph: DEFINES:\n {pformat(self.defines)};\n EDGES:\n {pformat(self.edges)}")
         self.create_stem_graph(stems, len(bulges))
-        log.debug("after create_stem_graph: DEFINES \n%s;\nEDGES \n%s",
-                  pformat(self.defines), pformat(self.edges))
+        log.debug(f"after create_stem_graph: DEFINES \n{pformat(self.defines)};\nEDGES \n{pformat(self.edges)}")
         self.collapse()
-        log.debug("after collapse: DEFINES:\n %s;\n EDGES:\n %s",
-                  pformat(self.defines), pformat(self.edges))
+        log.debug(f"after collapse: DEFINES:\n {pformat(self.defines)};\n EDGES:\n {pformat(self.edges)}")
         self.sort_defines()
-        log.debug("after _sort_defines: DEFINES:\n%s;\n EDGES:\n%s",
-                  pformat(self.defines), pformat(self.edges))
+        log.debug(f"after _sort_defines: DEFINES:\n{pformat(self.defines)};\n EDGES:\n{pformat(self.edges)}")
         self.relabel_nodes()
-        log.debug("after relabel_nodes: DEFINES:\n %s;\n EDGES:\n %s",
-                  pformat(self.defines), pformat(self.edges))
+        log.debug(f"after relabel_nodes: DEFINES:\n {pformat(self.defines)};\n EDGES:\n {pformat(self.edges)}")
         self.remove_degenerate_nodes()
 
     def remove_degenerate_nodes(self):
@@ -309,7 +303,7 @@ class _BulgeGraphConstruction(BaseGraph):
 
                     if all_connections == [[1, 2], [0, 3]]:
                         # interior loop
-                        log.debug("Collapsing %s and %s", b1, b2)
+                        log.debug(f"Collapsing {b1} and {b2}")
                         self.merge_vertices([b1, b2])
                         new_vertex = True
                         break
@@ -343,8 +337,8 @@ class _BulgeGraphConstruction(BaseGraph):
                     continue
                 if abs(s1 - s2) == 1:
                     bn = 'b{}'.format(bulge_counter)
-                    log.debug("Adding bulge %s between %s and %s. (%s is next to %s ) k1 %s, k2 %s, l1 %s, l2 %s",
-                              bn, stems[i], stems[j], s1, s2, k1, k2, l1, l2)
+                    log.debug(f"Adding bulge {bn} between {stems[i]} and {stems[j]}. ({s1} is next to {s2}) "
+                              f"k1 {k1}, k2 {k2}, l1 {l1}, l2 {l2}")
                     # self.defines[bn] = [min(s1, s2)+1, max(s1, s2)+1]
                     self.defines[bn] = []
                     self.weights[bn] = 1

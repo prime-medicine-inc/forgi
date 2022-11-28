@@ -77,7 +77,7 @@ def pdb_rmsd(cg1, cg2):
         chain2, = cg2.chains.values()
         resnames1=[ r.resname.strip() for r in chain1 ]
         resnames2=[ r.resname.strip() for r in chain2 ]
-        log.info("Resname lists are %s, %s", resnames1, resnames2)
+        log.info("Resname lists are {}, {}".format(resnames1, resnames2))
         if resnames1 == resnames2:
             for r in chain1:
                 if r.resname.strip() in ftup.RNA_RESIDUES:
@@ -96,7 +96,7 @@ def pdb_rmsd(cg1, cg2):
                       ftup.residuelist_rmsd(reslist1, reslist2, sidechains=True)[1]))
             return True
     else:
-        log.info("Chain lengths are %s and %s",len(cg1.chains), len(cg2.chains) )
+        log.info("Chain lengths are {} and {}".format(len(cg1.chains), len(cg2.chains) ))
         common_chains = set(cg1.chains.keys()) & set(cg2.chains.keys())
         reslist1 = []
         reslist2 = []
@@ -124,20 +124,20 @@ def common_reslists(chain1, chain2):
             mismatches=m
             reslist1, reslist2 = rl1, rl2
     if mismatches:
-        log.warning("There were %s point mutations between the two chains", mismatches)
+        log.warning("There were {} point mutations between the two chains".format(mismatches))
     if mismatches>8:
         raise ValueError("Could not find mapping between chains!")
     return reslist1, reslist2
 
 def _common_reslist_with_offset(chain1, chain2, offset):
-    log.info("Trying mapping with offset %s", offset)
+    log.info("Trying mapping with offset {}".format(offset))
     reslist1 = []
     reslist2 = []
     for cr2 in chain2.get_list():
         mapped_id = cr2.id[0], cr2.id[1]-offset, cr2.id[2]
         if mapped_id not in chain1:
-            log.info("Residue %s (%s) [->%s] not in chain1", cr2.id, cr2.resname.strip(), mapped_id)
-            log.info("Res %s has atoms %s", mapped_id, cr2.get_list())
+            log.info("Residue {} ({}) [->{}] not in chain1".format(cr2.id, cr2.resname.strip(), mapped_id))
+            log.info("Res {} has atoms {}".format(mapped_id, cr2.get_list()))
     mismatch=0
     for cr1 in chain1.get_list():
         mapped_id = cr1.id[0], cr1.id[1]+offset, cr1.id[2]
@@ -145,13 +145,13 @@ def _common_reslist_with_offset(chain1, chain2, offset):
         try:
             cr2 = chain2[mapped_id]
         except KeyError as e:
-            log.info("Residue %s (%s) [->%s] not in chain2", cr1.id, cr1_name, mapped_id)
+            log.info("Residue {} ({}) [->{}] not in chain2".format(cr1.id, cr1_name, mapped_id))
             continue
         cr2_name = cr2.resname.strip()
         if cr1_name != cr2_name:
             mismatch+=1
-            log.info("Residue %s [->%s](chains %s, %s) has different name in the "
-                        "two chains: %s!=%s", cr1.id, mapped_id, chain1.id, chain2.id, cr1_name, cr2_name)
+            log.info("Residue {} [->{}](chains {}, {}) has different name in the "
+                        "two chains: {}!={}".format(cr1.id, mapped_id, chain1.id, chain2.id, cr1_name, cr2_name))
         if cr1_name in ftup.RNA_RESIDUES and cr2_name in ftup.RNA_RESIDUES:
             reslist1.append(cr1)
             reslist2.append(cr2)
